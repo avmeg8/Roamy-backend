@@ -233,5 +233,5 @@ app.post("/extract", async (req, res) => {
 // Health check
 app.get("/", (req, res) => res.json({ status: "Roamy backend running ✈" }));
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Roamy backend listening on port ${PORT}`));
