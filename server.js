@@ -57,7 +57,7 @@ async function askAI(text) {
   console.log("Calling OpenRouter, key length: " + (OPENROUTER_KEY ? OPENROUTER_KEY.length : "MISSING"));
 
   var res = await axios.post("https://openrouter.ai/api/v1/chat/completions", {
-    model: "meta-llama/llama-3.1-8b-instruct:free",
+    model: "meta-llama/llama-3-8b-instruct:free",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 512,
     temperature: 0.1,
