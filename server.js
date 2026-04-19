@@ -123,7 +123,7 @@ async function askAI(text) {
 
 // ── Google Places search ───────────────────────────────────────────────────────
 async function searchGooglePlace(query) {
-  var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,photos,website,opening_hours,price_level&key=" + GOOGLE_KEY;
+  var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,photos,opening_hours,price_level&key=" + GOOGLE_KEY;
   try {
     var res = await axios.get(url, { timeout: 8000 });
     console.log("Google status for '" + query + "': " + res.data.status);
