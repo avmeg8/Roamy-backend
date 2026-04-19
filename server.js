@@ -124,11 +124,17 @@ async function askAI(text) {
 // ── Google Places search ───────────────────────────────────────────────────────
 async function searchGooglePlace(query) {
   var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,photos,website,opening_hours,price_level&key=" + GOOGLE_KEY;
-  var res = await axios.get(url, { timeout: 8000 });
-  console.log("Google status for '" + query + "': " + res.data.status);
-  if (res.data.error_message) console.log("Google error: " + res.data.error_message);
-  var candidates = res.data.candidates;
-  return (candidates && candidates.length > 0) ? candidates[0] : null;
+  try {
+    var res = await axios.get(url, { timeout: 8000 });
+    console.log("Google status for '" + query + "': " + res.data.status);
+    if (res.data.error_message) console.log("Google error message: " + res.data.error_message);
+    var candidates = res.data.candidates;
+    return (candidates && candidates.length > 0) ? candidates[0] : null;
+  } catch(e) {
+    console.log("Google HTTP error for '" + query + "': " + e.message);
+    if (e.response) console.log("Google HTTP status: " + e.response.status + " body: " + JSON.stringify(e.response.data).slice(0,200));
+    return null;
+  }
 }
 
 // ── Photo proxy ───────────────────────────────────────────────────────────────
