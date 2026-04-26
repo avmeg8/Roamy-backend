@@ -4,6 +4,7 @@ const axios = require("axios");
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"], allowedHeaders: ["Content-Type", "Authorization"] }));
@@ -13,6 +14,9 @@ const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
 const GOOGLE_KEY = process.env.GOOGLE_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || "roamy-secret-2024-change-this";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://roamyclone.edgeone.app";
+const BACKEND_URL = process.env.BACKEND_URL || "https://roamy-backend.onrender.com";
+if (!process.env.JWT_SECRET) console.warn("WARNING: JWT_SECRET env var not set, using insecure default");
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -78,6 +82,8 @@ async function setupDB() {
       data JSONB NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_collab_collections_owner ON collab_collections (collection_id, owner_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_collection_invites_unique ON collection_invites (collection_id, owner_id, invitee_email);
   `);
   console.log("DB setup complete");
 }
@@ -110,7 +116,7 @@ app.post("/auth/register", async (req, res) => {
     res.json({ token, user: { id: user.id, email: user.email } });
   } catch(e) {
     if (e.code === "23505") return res.status(400).json({ error: "Email already registered" });
-    console.log("Register error:", e.message);
+    console.error("Register error:", e.message);
     res.status(500).json({ error: "Registration failed" });
   }
 });
@@ -127,7 +133,7 @@ app.post("/auth/login", async (req, res) => {
     var token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "90d" });
     res.json({ token, user: { id: user.id, email: user.email } });
   } catch(e) {
-    console.log("Login error:", e.message);
+    console.error("Login error:", e.message);
     res.status(500).json({ error: "Login failed" });
   }
 });
@@ -166,7 +172,7 @@ app.get("/sync", authMiddleware, async (req, res) => {
       collections: collections
     });
   } catch(e) {
-    console.log("Sync error:", e.message);
+    console.error("Sync error:", e.message);
     res.status(500).json({ error: "Sync failed" });
   }
 });
@@ -174,29 +180,33 @@ app.get("/sync", authMiddleware, async (req, res) => {
 // Full sync push (upsert all places + collections)
 app.post("/sync", authMiddleware, async (req, res) => {
   var { places, collections } = req.body;
+  var client = await pool.connect();
   try {
-    // Upsert places
+    await client.query("BEGIN");
     if (places && places.length) {
       for (var p of places) {
-        await pool.query(
+        await client.query(
           "INSERT INTO places (id, user_id, data) VALUES ($1, $2, $3) ON CONFLICT (id, user_id) DO UPDATE SET data = $3",
           [p.id, req.user.id, JSON.stringify(p)]
         );
       }
     }
-    // Upsert collections
     if (collections && collections.length) {
       for (var c of collections) {
-        await pool.query(
+        await client.query(
           "INSERT INTO collections (id, user_id, data) VALUES ($1, $2, $3) ON CONFLICT (id, user_id) DO UPDATE SET data = $3",
           [c.id, req.user.id, JSON.stringify(c)]
         );
       }
     }
+    await client.query("COMMIT");
     res.json({ success: true });
   } catch(e) {
-    console.log("Sync push error:", e.message);
+    await client.query("ROLLBACK");
+    console.error("Sync push error:", e.message);
     res.status(500).json({ error: "Sync failed" });
+  } finally {
+    client.release();
   }
 });
 
@@ -258,19 +268,18 @@ app.post("/collections/:id/invite", authMiddleware, async (req, res) => {
   if (!email) return res.status(400).json({ error: "Email required" });
   try {
     // Check collection exists and belongs to user
-    var colRes = await pool.query("SELECT data FROM collections WHERE id = $1 AND user_id = $2", [colId, req.user.id]);
+    var colRes = await pool.query("SELECT id FROM collections WHERE id = $1 AND user_id = $2", [colId, req.user.id]);
     if (!colRes.rows.length) return res.status(404).json({ error: "Collection not found" });
-    var col = colRes.rows[0].data;
     // Create invite token
-    var token = require("crypto").randomBytes(24).toString("hex");
+    var token = crypto.randomBytes(24).toString("hex");
     await pool.query(
-      "INSERT INTO collection_invites (collection_id, owner_id, invitee_email, token) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+      "INSERT INTO collection_invites (collection_id, owner_id, invitee_email, token) VALUES ($1, $2, $3, $4) ON CONFLICT (collection_id, owner_id, invitee_email) DO UPDATE SET token = EXCLUDED.token, accepted = FALSE",
       [colId, req.user.id, email.toLowerCase().trim(), token]
     );
-    var inviteUrl = "https://roamyclone.edgeone.app/?invite=" + token;
+    var inviteUrl = FRONTEND_URL + "/?invite=" + token;
     res.json({ success: true, inviteUrl, token });
   } catch(e) {
-    console.log("Invite error:", e.message);
+    console.error("Invite error:", e.message);
     res.status(500).json({ error: "Invite failed" });
   }
 });
@@ -349,7 +358,7 @@ async function searchGooglePlace(query) {
   try {
     var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,photos,opening_hours,price_level&key=" + GOOGLE_KEY;
     var res = await axios.get(url, { timeout: 8000 });
-    if (res.data.error_message) console.log("Google error:", res.data.error_message);
+    if (res.data.error_message) console.error("Google error:", res.data.error_message);
     var candidates = res.data.candidates;
     return (candidates && candidates.length > 0) ? candidates[0] : null;
   } catch(e) { return null; }
@@ -361,7 +370,7 @@ async function getGoogleData(name, city, country) {
   for (var i = 0; i < queries.length; i++) { place = await searchGooglePlace(queries[i]); if (place) break; }
   if (!place) return null;
   var photoUrl = null;
-  if (place.photos && place.photos.length > 0) photoUrl = "https://roamy-backend.onrender.com/photo?ref=" + encodeURIComponent(place.photos[0].photo_reference);
+  if (place.photos && place.photos.length > 0) photoUrl = BACKEND_URL + "/photo?ref=" + encodeURIComponent(place.photos[0].photo_reference);
   return { rating: place.rating || null, totalRatings: place.user_ratings_total || null, address: place.formatted_address || null, photoUrl, openNow: place.opening_hours ? place.opening_hours.open_now : null, priceLevel: place.price_level || null };
 }
 
@@ -377,7 +386,7 @@ app.get("/photo", async (req, res) => {
   } catch(e) { res.status(500).send("Photo failed"); }
 });
 
-app.post("/extract", async (req, res) => {
+app.post("/extract", authMiddleware, async (req, res) => {
   var input = req.body.input;
   if (!input || !input.trim()) return res.status(400).json({ error: "No input provided" });
   var trimmed = input.trim();
@@ -415,8 +424,6 @@ app.post("/generate-cover", authMiddleware, async (req, res) => {
   console.log("Fetching Unsplash cover for:", query);
 
   try {
-    // Unsplash source API - no auth needed, returns random photo
-    var page = Math.floor(Math.random() * 5) + 1;
     var url = "https://api.unsplash.com/photos/random?query=" + encodeURIComponent(query) + "&orientation=landscape&content_filter=high&client_id=" + process.env.UNSPLASH_KEY;
     
     var response = await axios.get(url, { timeout: 10000 });
@@ -443,10 +450,10 @@ app.post("/generate-cover", authMiddleware, async (req, res) => {
 app.post("/share", authMiddleware, async (req, res) => {
   var data = req.body.data;
   if (!data) return res.status(400).json({ error: "No data" });
-  var token = require("crypto").randomBytes(5).toString("hex"); // 10 char token
+  var token = crypto.randomBytes(5).toString("hex");
   try {
     await pool.query("INSERT INTO shares (token, data) VALUES ($1, $2)", [token, JSON.stringify(data)]);
-    res.json({ success: true, token, url: "https://roamyclone.edgeone.app/?s=" + token });
+    res.json({ success: true, token, url: FRONTEND_URL + "/?s=" + token });
   } catch(e) {
     res.status(500).json({ error: e.message });
   }
@@ -470,15 +477,17 @@ app.post("/collections/:id/collab", authMiddleware, async (req, res) => {
   try {
     var colRes = await pool.query("SELECT data FROM collections WHERE id=$1 AND user_id=$2", [colId, req.user.id]);
     if (!colRes.rows.length) return res.status(404).json({ error: "Collection not found" });
-    var existing = await pool.query("SELECT collab_token FROM collab_collections WHERE collection_id=$1 AND owner_id=$2", [colId, req.user.id]);
-    if (existing.rows.length) return res.json({ success: true, token: existing.rows[0].collab_token });
-    var token = require("crypto").randomBytes(6).toString("hex");
+    var token = crypto.randomBytes(6).toString("hex");
     var colData = colRes.rows[0].data;
     var initState = { sections: colData.sections || [], sectionMap: colData.sectionMap || {} };
-    await pool.query(
-      "INSERT INTO collab_collections (collab_token, collection_id, owner_id, shared_state) VALUES ($1,$2,$3,$4)",
+    var inserted = await pool.query(
+      "INSERT INTO collab_collections (collab_token, collection_id, owner_id, shared_state) VALUES ($1,$2,$3,$4) ON CONFLICT (collection_id, owner_id) DO NOTHING RETURNING collab_token",
       [token, colId, req.user.id, JSON.stringify(initState)]
     );
+    if (!inserted.rows.length) {
+      var fetched = await pool.query("SELECT collab_token FROM collab_collections WHERE collection_id=$1 AND owner_id=$2", [colId, req.user.id]);
+      return res.json({ success: true, token: fetched.rows[0].collab_token });
+    }
     res.json({ success: true, token });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -555,7 +564,7 @@ app.post("/collab/:token/places", authMiddleware, async (req, res) => {
   try {
     var cc = await pool.query("SELECT collab_token FROM collab_collections WHERE collab_token=$1", [req.params.token]);
     if (!cc.rows.length) return res.status(404).json({ error: "Collab not found" });
-    var id = "cp" + Date.now() + Math.random().toString(36).slice(2, 6);
+    var id = "cp" + crypto.randomBytes(8).toString("hex");
     place.id = id;
     await pool.query(
       "INSERT INTO collab_places (id, collab_token, added_by_id, added_by_name, data) VALUES ($1,$2,$3,$4,$5)",
