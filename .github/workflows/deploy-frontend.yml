@@ -15,8 +15,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy to EdgeOne Pages
-        uses: TencentEdgeOne/pages-action@v1
-        with:
-          apiToken: ${{ secrets.EDGEONE_API_TOKEN }}
-          projectName: roamyclone
-          directory: frontend
+        run: npx edgeone pages deploy frontend -n roamyclone -t ${{ secrets.EDGEONE_API_TOKEN }}
