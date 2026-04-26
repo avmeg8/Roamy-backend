@@ -1,0 +1,22 @@
+name: Deploy Frontend to EdgeOne Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to EdgeOne Pages
+        uses: TencentEdgeOne/pages-action@v1
+        with:
+          apiToken: ${{ secrets.EDGEONE_API_TOKEN }}
+          projectName: roamyclone
+          directory: frontend

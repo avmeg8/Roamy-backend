@@ -1,0 +1,2723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Hoplist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#3B5BDB"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Hoplist"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+/* Remove ALL browser tap highlights globally */
+*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+input,textarea,button{-webkit-tap-highlight-color:transparent;outline:none;}
+
+:root{
+  --blue:#3B5BDB;--blue-light:#EEF2FF;--blue-mid:#BAC8FF;--blue-dark:#2F4AC7;
+  --white:#fff;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+  --gray-300:#CBD5E1;--gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+  --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+  --green:#10B981;--red:#EF4444;--amber:#F59E0B;
+  --shadow:0 4px 16px rgba(0,0,0,0.1);--shadow-lg:0 24px 48px rgba(0,0,0,0.18);
+  --r:14px;--r-sm:10px;--nav-h:64px;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-900);-webkit-font-smoothing:antialiased;}
+body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100%;}
+
+/* NAV */
+.bottom-nav{display:flex;background:var(--white);border-top:1.5px solid var(--gray-200);flex-shrink:0;z-index:9999;width:100%;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 12px rgba(0,0,0,0.06);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0;border:none;background:transparent;cursor:pointer;color:var(--gray-400);font-family:'Inter',sans-serif;transition:color 0.2s,transform 0.15s;}
+.nav-btn:active{transform:scale(0.9);}
+.nav-btn.active{color:var(--blue);}
+.nav-icon{font-size:22px;line-height:1;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.nav-btn.active .nav-icon{transform:scale(1.1);}
+.nav-label{font-size:10.5px;font-weight:600;letter-spacing:0.02em;}
+
+/* PAGES */
+.page{display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
+.page.active{display:flex;}
+
+/* ── HOME ── */
+.home-header{background:var(--white);border-bottom:1px solid var(--gray-200);flex-shrink:0;}
+.home-top{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:26px;height:32px;background:linear-gradient(180deg,#82C8FA 0%,#2640D2 100%);border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;position:relative;flex-shrink:0;}
+.logo-icon::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #2640D2;}
+.logo-text{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--gray-900);letter-spacing:-0.3px;}
+.hstats{display:flex;gap:14px;}
+.hstat-num{font-size:15px;font-weight:700;color:var(--blue);text-align:center;}
+.hstat-lbl{font-size:9px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;font-weight:500;}
+.add-row{padding:10px 16px;display:flex;gap:8px;}
+.add-input{flex:1;padding:12px 14px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.add-input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+.add-input:disabled{opacity:0.6;}
+.add-btn{width:46px;height:46px;background:var(--blue);border:none;border-radius:var(--r-sm);cursor:pointer;color:white;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,0.3);transition:background 0.15s,transform 0.15s cubic-bezier(0.34,1.56,0.64,1);}
+.add-btn:active{transform:scale(0.9);}
+.add-btn:hover{background:var(--blue-dark);}
+.add-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.tabs-row{display:flex;padding:0 16px 10px;gap:4px;}
+.htab{padding:7px 16px;border-radius:20px;font-size:12.5px;font-weight:600;color:var(--gray-500);cursor:pointer;border:none;background:transparent;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.htab.active{background:var(--blue);color:white;}
+.htab:not(.active):hover{background:var(--gray-100);}
+.search-row{padding:0 16px 12px;position:relative;}
+.search-row input{width:100%;padding:9px 14px 9px 36px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:13.5px;outline:none;transition:border-color 0.2s;color:var(--gray-900);}
+.search-row input:focus{border-color:var(--blue);}
+.search-row input::placeholder{color:var(--gray-400);}
+.search-icon{position:absolute;left:28px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--gray-400);pointer-events:none;}
+
+/* LIST */
+.place-list{flex:1;overflow-y:auto;padding:8px 0 12px;}
+.place-list::-webkit-scrollbar{display:none;}
+.country-group{margin-bottom:4px;}
+.country-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px;cursor:pointer;user-select:none;}
+.country-hdr:hover{background:var(--gray-50);}
+.c-left{display:flex;align-items:center;gap:8px;}
+.c-flag{font-size:20px;}
+.c-name{font-size:14px;font-weight:700;color:var(--gray-800);}
+.c-count{font-size:10.5px;color:var(--gray-400);background:var(--gray-100);padding:2px 8px;border-radius:20px;font-weight:500;}
+.c-chev{font-size:11px;color:var(--gray-400);transition:transform 0.2s;display:inline-block;}
+.c-chev.open{transform:rotate(180deg);}
+.city-sec{padding:0 12px 4px;}
+.city-lbl{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-400);font-weight:600;padding:6px 4px 3px;display:flex;align-items:center;gap:6px;}
+.city-lbl::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+.pcard{background:var(--white);border-radius:var(--r-sm);margin:3px 4px;border:1.5px solid var(--gray-100);overflow:hidden;}
+.pcard-main{display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;transition:background 0.15s,transform 0.1s;user-select:none;}
+.pcard-main:active{transform:scale(0.99);background:var(--blue-light);}
+.pcard-main:hover{background:var(--gray-50);}
+.pthumb{width:52px;height:52px;border-radius:9px;overflow:hidden;flex-shrink:0;background:var(--gray-100);}
+.pthumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.pthumb-emo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;background:linear-gradient(135deg,var(--blue-light),var(--blue-mid));}
+.pinfo{flex:1;min-width:0;}
+.pname{font-size:14px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.pmeta{display:flex;align-items:center;gap:5px;overflow:hidden;}
+.ptype-tag{font-size:11px;color:var(--blue);background:var(--blue-light);padding:2px 8px;border-radius:20px;font-weight:600;text-transform:capitalize;white-space:nowrap;}
+.prating{font-size:11.5px;color:var(--amber);font-weight:700;white-space:nowrap;}
+.pvis-tag{font-size:10px;color:var(--green);background:#D1FAE5;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.pchev{font-size:12px;color:var(--gray-400);flex-shrink:0;}
+.pcard-actions{display:flex;border-top:1px solid var(--gray-100);}
+.pact{flex:1;padding:10px;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background 0.15s;}
+.pact:not(:last-child){border-right:1px solid var(--gray-100);}
+.pact.vis{color:var(--green);}
+.pact.vis:hover{background:#D1FAE5;}
+.pact.vis.on{background:#D1FAE5;color:#065F46;}
+.pact.map{color:var(--blue);}
+.pact.map:hover{background:var(--blue-light);}
+.pact.col{color:#7C3AED;}
+.pact.col:hover{background:#EDE9FE;}
+.pact.del{color:var(--red);}
+.pact.del:hover{background:#FEE2E2;}
+.pcard-confirm{display:none;padding:12px 16px;background:#FEF2F2;border-top:1px solid #FECACA;align-items:center;justify-content:space-between;gap:10px;}
+.pcard-confirm.show{display:flex;}
+.confirm-text{font-size:13px;color:var(--red);font-weight:500;}
+.confirm-btns{display:flex;gap:8px;}
+.cbtn{padding:7px 14px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.cbtn.yes{background:var(--red);color:white;}
+.cbtn.no{background:var(--gray-200);color:var(--gray-700);}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:32px;text-align:center;}
+.empty-icon{font-size:52px;opacity:0.18;}
+.empty-title{font-size:17px;font-weight:700;color:var(--gray-500);}
+.empty-sub{font-size:13px;color:var(--gray-400);line-height:1.65;max-width:220px;}
+.empty-examples{display:flex;flex-direction:column;gap:6px;width:100%;margin-top:4px;}
+.ex-btn{font-size:13px;color:var(--gray-700);background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);padding:11px 14px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.ex-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.skel-wrap{padding:4px 16px;}
+.skel-card{background:var(--white);border-radius:var(--r-sm);padding:12px;display:flex;gap:12px;align-items:center;margin:3px 0;}
+.skel-img{width:52px;height:52px;border-radius:9px;background:var(--gray-100);flex-shrink:0;}
+.skel-lines{flex:1;display:flex;flex-direction:column;gap:8px;}
+.skel-line{height:11px;border-radius:4px;background:linear-gradient(90deg,var(--gray-100) 25%,var(--gray-50) 50%,var(--gray-100) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+
+/* ── COLLECTIONS PAGE ── */
+.col-page{background:var(--gray-50);}
+.col-header{background:var(--white);border-bottom:1px solid var(--gray-200);padding:16px 16px 14px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+.col-title{font-family:'Poppins',sans-serif;font-size:22px;color:var(--gray-900);}
+.col-new-btn{width:38px;height:38px;background:var(--blue);border:none;border-radius:10px;cursor:pointer;color:white;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(37,99,235,0.3);transition:background 0.15s;}
+.col-new-btn:hover{background:var(--blue-dark);}
+.col-list{flex:1;overflow-y:auto;padding:16px 16px 20px;display:flex;flex-direction:column;gap:14px;}
+.col-list::-webkit-scrollbar{display:none;}
+
+/* COLLECTION CARD */
+.col-card{border-radius:18px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s ease;position:relative;min-height:200px;display:flex;flex-direction:column;justify-content:flex-end;user-select:none;}
+.col-card:active{transform:scale(0.97);box-shadow:0 2px 8px rgba(0,0,0,0.12);}
+.col-card-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+.col-card-gradient{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%);}
+.col-card-body{position:relative;padding:20px;}
+.col-card-emoji{font-size:28px;margin-bottom:6px;display:block;}
+.col-card-name{font-family:'Poppins',sans-serif;font-size:22px;color:white;font-weight:600;margin-bottom:6px;line-height:1.2;}
+.col-card-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.col-card-stat{font-size:12px;color:rgba(255,255,255,0.85);font-weight:500;display:flex;align-items:center;gap:4px;}
+.col-card-countries{display:flex;gap:2px;}
+.col-card-actions{position:absolute;top:14px;right:14px;display:flex;gap:6px;}
+.col-card-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;backdrop-filter:blur(8px);}
+.col-card-btn.edit{background:rgba(255,255,255,0.2);color:white;}
+.col-card-btn.edit:hover{background:rgba(255,255,255,0.35);}
+.col-card-btn.share{background:rgba(255,255,255,0.2);color:white;}
+.col-card-btn.share:hover{background:rgba(255,255,255,0.35);}
+.col-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:14px;padding:40px;text-align:center;}
+.col-empty-icon{font-size:56px;opacity:0.18;}
+.col-empty-title{font-size:18px;font-weight:700;color:var(--gray-500);}
+.col-empty-sub{font-size:13px;color:var(--gray-400);line-height:1.65;max-width:230px;}
+.col-create-btn{padding:13px 28px;background:var(--blue);color:white;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(37,99,235,0.3);}
+
+/* COLLECTION DETAIL PAGE */
+/* TRIP DATE & SECTIONS */
+.col-date-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;padding:6px 14px;color:white;font-size:12.5px;font-weight:600;cursor:pointer;margin-top:8px;transition:background 0.15s;}
+.col-date-pill:active{background:rgba(255,255,255,0.3);}
+.col-date-pill.no-date{border-style:dashed;opacity:0.75;}
+.col-date-countdown{font-size:11px;opacity:0.8;font-weight:500;}
+/* SECTION TABS - horizontal */
+.sec-tabs-wrap{flex-shrink:0;border-bottom:1.5px solid var(--gray-100);}
+.sec-tabs{display:flex;overflow-x:auto;gap:0;padding:0 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.sec-tabs::-webkit-scrollbar{display:none;}
+.sec-tab{padding:12px 14px 10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--gray-400);cursor:pointer;border:none;background:transparent;white-space:nowrap;transition:all 0.2s;flex-shrink:0;border-bottom:2.5px solid transparent;position:relative;display:flex;align-items:center;gap:5px;}
+.sec-tab.active{color:var(--gray-900);border-bottom-color:var(--gray-900);}
+.sec-tab-count{font-size:11px;color:var(--gray-400);background:var(--gray-100);padding:1px 6px;border-radius:10px;font-weight:500;}
+.sec-tab.active .sec-tab-count{background:var(--gray-200);color:var(--gray-700);}
+.sec-tab-edit{width:20px;height:20px;border-radius:50%;border:none;background:transparent;color:var(--gray-400);font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.sec-tab-edit:active{background:var(--gray-100);}
+.sec-add-tab{padding:12px 10px 10px;font-family:'Inter',sans-serif;font-size:20px;color:var(--gray-400);cursor:pointer;border:none;background:transparent;flex-shrink:0;border-bottom:2.5px solid transparent;line-height:1;}
+.sec-content{flex:1;overflow-y:auto;padding:8px 0 20px;}
+.sec-content::-webkit-scrollbar{display:none;}
+.sec-add-place-btn{display:flex;align-items:center;gap:8px;padding:12px 16px;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;font-family:'Inter',sans-serif;width:100%;}
+.unsorted-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-400);font-weight:600;padding:10px 16px 4px;display:flex;align-items:center;gap:8px;}
+.unsorted-label::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+.sec-place-badge{font-size:10.5px;color:var(--gray-400);background:var(--gray-100);padding:2px 8px;border-radius:20px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;border:1px solid transparent;}
+.sec-place-badge:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+/* Date input modal */
+.date-row{display:flex;gap:10px;margin-bottom:14px;}
+.date-field{flex:1;}
+.date-field label{display:block;font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+.date-field input[type=date]{width:100%;padding:11px 12px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;transition:border-color 0.2s;}
+.date-field input[type=date]:focus{border-color:var(--blue);}
+/* Section rename modal */
+.sec-modal{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:520px;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));animation:slideUp 0.3s cubic-bezier(0.16,1,0.3,1);}
+
+.col-detail-page{position:fixed;inset:0;background:var(--white);z-index:800;display:none;flex-direction:column;transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);}
+.col-detail-page.open{display:flex;transform:translateX(0);}
+.col-detail-page.closing{transform:translateX(100%);}
+.col-detail-hero{position:relative;height:240px;flex-shrink:0;}
+.col-detail-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;overflow:hidden;border-radius:inherit;}
+.col-detail-hero-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.75) 100%);pointer-events:none;}
+.col-detail-hero-content{position:relative;z-index:1;padding:20px 20px 16px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;overflow:visible;}
+.col-detail-back{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);border:none;cursor:pointer;color:white;font-size:18px;display:flex;align-items:center;justify-content:center;margin-bottom:auto;}
+.col-detail-emoji{font-size:32px;margin-bottom:6px;}
+.col-detail-name{font-family:'Poppins',sans-serif;font-size:26px;color:white;font-weight:600;margin-bottom:6px;}
+.col-detail-meta{display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px;margin:0 -20px;padding-left:20px;padding-right:20px;}.col-detail-meta::-webkit-scrollbar{display:none;}
+.col-detail-stat{font-size:12.5px;color:rgba(255,255,255,0.85);font-weight:500;flex-shrink:0;white-space:nowrap;}
+.col-detail-share{padding:8px 14px;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);border-radius:20px;color:white;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;flex-shrink:0;white-space:nowrap;}
+.col-detail-share:hover{background:rgba(255,255,255,0.35);}
+.col-detail-places{flex:1;overflow-y:auto;padding:12px 0 20px;}
+.col-detail-places::-webkit-scrollbar{display:none;}
+
+/* MAP PAGE */
+.map-page{position:relative;}
+#map{width:100%;height:100%;}
+.map-search-bar{position:absolute;top:16px;left:16px;right:16px;z-index:500;}
+.map-search-inner{background:white;border-radius:var(--r);box-shadow:0 2px 16px rgba(0,0,0,0.15);display:flex;align-items:center;overflow:hidden;}
+.ms-icon{padding:0 12px;font-size:18px;color:var(--gray-400);flex-shrink:0;}
+.ms-input{flex:1;padding:14px 0;font-family:'Inter',sans-serif;font-size:15px;color:var(--gray-900);border:none;outline:none;background:transparent;}
+.ms-input::placeholder{color:var(--gray-400);}
+.ms-clear{padding:0 14px;font-size:15px;color:var(--gray-400);cursor:pointer;border:none;background:transparent;display:none;}
+.ms-clear.show{display:block;}
+.map-chips{position:absolute;top:74px;left:0;right:0;z-index:500;padding:0 16px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.map-chips::-webkit-scrollbar{display:none;}
+.mchip{background:white;border:none;border-radius:20px;padding:7px 13px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray-600);box-shadow:0 1px 6px rgba(0,0,0,0.12);cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0;display:flex;align-items:center;}
+.mchip.active{background:var(--gray-900);color:white;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.map-bottom-stats{position:absolute;bottom:16px;left:16px;z-index:500;display:flex;gap:8px;}
+.mstat{background:white;border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--gray-700);box-shadow:0 1px 6px rgba(0,0,0,0.12);display:flex;align-items:center;gap:5px;}
+.mstat-dot{width:8px;height:8px;border-radius:50%;}
+
+/* DETAIL SHEET */
+.sheet-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.4);z-index:2000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.25s ease;backdrop-filter:blur(4px);}
+.sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;animation:slideUp 0.4s cubic-bezier(0.16,1,0.3,1);padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 16px);}
+.sheet::-webkit-scrollbar{display:none;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+@keyframes slideDown{from{transform:translateY(0);}to{transform:translateY(100%);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes fadeOut{from{opacity:1;}to{opacity:0;}}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.sheet-overlay.closing{animation:fadeOut 0.3s ease forwards;}
+.sheet-overlay.closing .sheet{animation:slideDown 0.3s cubic-bezier(0.4,0,1,1) forwards;}
+.sheet-handle{width:36px;height:4px;background:var(--gray-300);border-radius:4px;margin:12px auto 0;}
+.sheet-photo{width:100%;height:200px;object-fit:cover;display:block;}
+.sheet-photo-emo{width:100%;height:180px;background:linear-gradient(135deg,var(--blue-light),var(--blue-mid));display:flex;align-items:center;justify-content:center;font-size:72px;}
+.sheet-body{padding:18px 20px 24px;}
+.sheet-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.sheet-name{font-family:'Poppins',sans-serif;font-size:22px;line-height:1.25;flex:1;}
+.sheet-x{width:32px;height:32px;border-radius:50%;border:none;background:var(--gray-100);color:var(--gray-600);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sheet-x:hover{background:var(--gray-200);}
+.sheet-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.spill{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;}
+.spill.type{color:var(--blue);background:var(--blue-light);cursor:pointer;}
+.spill.rat{color:var(--amber);background:#FEF3C7;}
+.spill.open{color:var(--green);background:#D1FAE5;}
+.spill.closed{color:var(--red);background:#FEE2E2;}
+.spill.price{color:var(--gray-600);background:var(--gray-100);}
+.sheet-addr{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.5;}
+.sheet-desc{font-size:14px;color:var(--gray-600);line-height:1.75;margin-bottom:18px;}
+.sheet-hr{height:1px;background:var(--gray-100);margin-bottom:16px;}
+.sheet-acts{display:flex;flex-direction:column;gap:8px;}
+.sact{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all 0.15s,transform 0.1s;user-select:none;}
+.sact:active{transform:scale(0.97);}
+.sact.primary{background:var(--blue);color:white;}
+.sact.primary:hover{background:var(--blue-dark);}
+.sact-row{display:flex;gap:8px;}
+.sact.half{flex:1;}
+.sact.sec{background:var(--gray-100);color:var(--gray-700);}
+.sact.sec:hover{background:var(--gray-200);}
+.sact.suc{background:#D1FAE5;color:#065F46;}
+.sact.suc:hover{background:#A7F3D0;}
+.sact.dan{background:#FEE2E2;color:#991B1B;}
+.sact.dan:hover{background:#FECACA;}
+.sact.purple{background:#EDE9FE;color:#5B21B6;}
+.sact.purple:hover{background:#DDD6FE;}
+.sheet-confirm{background:#FEF2F2;border:1.5px solid #FECACA;border-radius:var(--r-sm);padding:14px;display:none;flex-direction:column;gap:10px;}
+.sheet-confirm.show{display:flex;}
+.sc-text{font-size:13.5px;color:var(--red);font-weight:500;text-align:center;}
+.sc-btns{display:flex;gap:8px;}
+.sc-btn{flex:1;padding:10px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.sc-btn.yes{background:var(--red);color:white;}
+.sc-btn.no{background:var(--gray-200);color:var(--gray-700);}
+
+/* CATEGORY EDITOR */
+.cat-editor{margin-bottom:14px;}
+.cat-editor-label{font-size:11.5px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.cat-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.cat-opt{padding:6px 12px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;transition:all 0.15s;}
+.cat-opt:hover{border-color:var(--blue);color:var(--blue);}
+.cat-opt.selected{color:white;border-color:transparent;}
+.cat-custom-row{display:flex;gap:6px;margin-top:4px;}
+.cat-custom-input{flex:1;padding:8px 12px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:20px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-900);outline:none;transition:border-color 0.2s;}
+.cat-custom-input:focus{border-color:var(--blue);}
+.cat-custom-input::placeholder{color:var(--gray-400);}
+.cat-save-btn{padding:8px 14px;background:var(--blue);color:white;border:none;border-radius:20px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;}
+
+/* NOTES */
+.notes-section{margin-bottom:14px;}
+.notes-label{font-size:11.5px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.notes-textarea{width:100%;padding:11px 13px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;resize:none;min-height:80px;line-height:1.6;transition:border-color 0.2s,box-shadow 0.2s;}
+.notes-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1);background:var(--white);}
+.notes-textarea::placeholder{color:var(--gray-400);}
+.notes-display{background:rgba(245,158,11,0.08);border:1.5px solid rgba(245,158,11,0.2);border-radius:var(--r-sm);padding:11px 13px;font-size:13.5px;color:var(--gray-700);line-height:1.6;white-space:pre-wrap;cursor:pointer;}
+.notes-display:hover{border-color:rgba(245,158,11,0.4);}
+.notes-display-label{font-size:10.5px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;display:flex;align-items:center;gap:4px;}
+.notes-save-btn{margin-top:7px;padding:9px 16px;background:var(--blue);color:white;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:3000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease;backdrop-filter:blur(4px);}
+.modal-overlay.closing{animation:fadeOut 0.3s ease forwards;}
+.modal-overlay.closing .modal,.modal-overlay.closing .bsheet{animation:slideDown 0.3s cubic-bezier(0.4,0,1,1) forwards;}
+.bsheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:520px;overflow-y:auto;max-height:93vh;-webkit-overflow-scrolling:touch;animation:slideUp 0.3s cubic-bezier(0.16,1,0.3,1);}
+.bsheet::-webkit-scrollbar{display:none;}
+.bsheet-handle{padding:14px 0 6px;display:flex;justify-content:center;cursor:grab;touch-action:none;}
+.bsheet-handle-bar{width:40px;height:5px;background:var(--gray-300);border-radius:4px;}
+.bsheet-pad{padding:0 20px 100px;}
+.bsheet-title{font-family:'Poppins',sans-serif;font-size:20px;color:var(--gray-900);margin-bottom:16px;}
+.modal-input{width:100%;padding:12px 14px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;margin-bottom:12px;transition:border-color 0.2s;}
+.modal-input:focus{border-color:var(--blue);}
+.modal-input::placeholder{color:var(--gray-400);}
+.modal-label{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:block;}
+.modal-btns{display:flex;gap:8px;margin-top:16px;}
+.mbtn{flex:1;padding:13px;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;}
+.mbtn.primary{background:var(--blue);color:white;}
+.mbtn.primary:hover{background:var(--blue-dark);}
+.mbtn.secondary{background:var(--gray-100);color:var(--gray-700);}
+.mbtn:active{transform:scale(0.97);}
+.emoji-grid{display:flex;overflow-x:auto;gap:8px;margin-bottom:4px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.emoji-grid::-webkit-scrollbar{display:none;}
+.emoji-opt{width:44px;height:44px;border-radius:12px;border:2px solid var(--gray-200);background:var(--gray-50);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
+.emoji-opt.selected{border-color:var(--blue);background:var(--blue-light);}
+.sheet-handle{width:40px;height:5px;background:var(--gray-300);border-radius:4px;margin:14px auto 4px;cursor:grab;touch-action:none;display:block;}
+.picker-handle{width:40px;height:5px;background:var(--gray-300);border-radius:4px;margin:14px auto 4px;cursor:grab;touch-action:none;display:block;}
+/* Drag handle zones — make them grabbable */
+.sheet-handle:active,.picker-handle:active{cursor:grabbing;}
+.col-picker-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:300px;overflow-y:auto;}
+.col-picker-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-sm);border:1.5px solid var(--gray-200);cursor:pointer;transition:all 0.15s;}
+.col-picker-item:hover{border-color:var(--blue);background:var(--blue-light);}
+.col-picker-item.in-col{border-color:var(--green);background:#D1FAE5;}
+.col-picker-emoji{font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:9px;flex-shrink:0;}
+.col-picker-name{font-size:14px;font-weight:600;color:var(--gray-900);flex:1;}
+.col-picker-count{font-size:12px;color:var(--gray-400);}
+.col-picker-check{font-size:16px;color:var(--green);}
+
+/* SHARE PAGE */
+.share-page{display:none;position:fixed;inset:0;background:var(--white);z-index:9999;flex-direction:column;}
+.share-page.open{display:flex;}
+.share-hero{position:relative;height:260px;flex-shrink:0;overflow:hidden;}
+.share-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+.share-hero-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.8) 100%);}
+.share-hero-content{position:relative;padding:24px 20px 24px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;}
+.share-brand{font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:auto;}
+.share-emoji{font-size:32px;margin-bottom:6px;}
+.share-name{font-family:'Poppins',sans-serif;font-size:28px;color:white;font-weight:600;margin-bottom:6px;}
+.share-meta{font-size:13px;color:rgba(255,255,255,0.8);}
+.share-map-wrap{height:200px;flex-shrink:0;}
+.share-map-wrap #shareMap{width:100%;height:100%;}
+.share-places{flex:1;overflow-y:auto;padding:12px 16px 80px;}
+.share-places::-webkit-scrollbar{display:none;}
+.share-place-card{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100);}
+.share-place-card:last-child{border-bottom:none;}
+.share-place-thumb{width:48px;height:48px;border-radius:9px;overflow:hidden;flex-shrink:0;background:var(--gray-100);}
+.share-place-thumb img{width:100%;height:100%;object-fit:cover;}
+.share-place-thumb-emo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,var(--blue-light),var(--blue-mid));}
+.share-place-info{flex:1;min-width:0;}
+.share-place-name{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:2px;}
+.share-place-sub{font-size:12px;color:var(--gray-400);}
+.share-footer{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--gray-200);padding:16px;display:flex;gap:8px;}
+.share-gmaps-btn{flex:1;padding:13px;background:var(--blue);color:white;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:7px;}
+.share-roamy-btn{padding:13px 16px;background:var(--gray-100);color:var(--gray-700);border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;}
+
+/* PICKER NOTES */
+.picker-notes-wrap{padding:0 16px 12px;}
+.picker-notes-label{font-size:11.5px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.picker-notes-input{width:100%;padding:11px 13px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;resize:none;min-height:70px;line-height:1.6;transition:border-color 0.2s;}
+.picker-notes-input:focus{border-color:var(--blue);background:var(--white);}
+.picker-notes-input::placeholder{color:var(--gray-400);}
+.picker-place{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;transition:all 0.15s;}
+.picker-place:hover{border-color:var(--blue);background:var(--blue-light);}
+.picker-place.selected{border-color:var(--blue);background:var(--blue-light);}
+.picker-place-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--gray-300);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;transition:all 0.15s;}
+.picker-place.selected .picker-place-check{background:var(--blue);border-color:var(--blue);color:white;}
+.picker-thumb{width:48px;height:48px;border-radius:9px;overflow:hidden;flex-shrink:0;background:var(--gray-100);}
+.picker-thumb img{width:100%;height:100%;object-fit:cover;}
+.picker-thumb-emo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,var(--blue-light),var(--blue-mid));}
+.picker-info{flex:1;min-width:0;}
+.picker-name{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.picker-meta{font-size:12px;color:var(--gray-500);display:flex;align-items:center;gap:5px;}
+.picker-type{font-size:11px;color:var(--blue);background:var(--blue-light);padding:1px 7px;border-radius:20px;font-weight:600;}
+.picker-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.4);z-index:2000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease;backdrop-filter:blur(3px);}
+.picker{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;animation:slideUp 0.32s cubic-bezier(0.16,1,0.3,1);padding-bottom:calc(var(--nav-h) + 16px);}
+.picker::-webkit-scrollbar{display:none;}
+.picker-handle{width:36px;height:4px;background:var(--gray-300);border-radius:4px;margin:12px auto 0;}
+.picker-header{padding:16px 20px 12px;}
+.picker-title{font-family:'Poppins',sans-serif;font-size:19px;color:var(--gray-900);margin-bottom:4px;}
+.picker-sub{font-size:13px;color:var(--gray-400);}
+.picker-places{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px;}
+.picker-footer{padding:0 16px 8px;display:flex;gap:8px;flex-direction:column;}
+.picker-save-btn{width:100%;padding:14px;background:var(--blue);color:white;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
+.picker-save-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.picker-cancel-btn{width:100%;padding:12px;background:var(--gray-100);color:var(--gray-600);border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+
+/* AUTH SCREEN */
+.auth-screen{position:fixed;inset:0;background:linear-gradient(160deg,#0D1259 0%,#1A2FB8 45%,#3B5BDB 100%);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;animation:fadeIn 0.4s ease;}
+.auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.auth-logo-icon{width:52px;height:64px;background:linear-gradient(180deg,rgba(255,255,255,0.85) 0%,rgba(255,255,255,0.55) 100%);border-radius:50% 50% 50% 50% / 38% 38% 62% 62%;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;flex-shrink:0;}
+.auth-logo-icon::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:15px solid rgba(255,255,255,0.55);}
+.auth-logo-text{font-family:'Poppins',sans-serif;font-size:38px;color:white;font-weight:800;letter-spacing:-0.5px;}
+.auth-tagline{font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:36px;text-align:center;}
+.auth-card{background:white;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,0.25);}
+.auth-tabs{display:flex;background:var(--gray-100);border-radius:12px;padding:3px;margin-bottom:22px;}
+.auth-tab{flex:1;padding:9px;border:none;background:transparent;border-radius:10px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all 0.2s;}
+.auth-tab.active{background:white;color:var(--gray-900);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.auth-field{margin-bottom:14px;}
+.auth-field label{display:block;font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;}
+.auth-field input{width:100%;padding:13px 14px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:15px;color:var(--gray-900);outline:none;transition:border-color 0.2s;}
+.auth-field input:focus{border-color:var(--blue);background:white;}
+.auth-submit{width:100%;padding:14px;background:var(--blue);color:white;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.auth-submit:hover{background:var(--blue-dark);}
+.auth-submit:disabled{opacity:0.5;cursor:not-allowed;}
+.auth-error{background:#FEE2E2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:#991B1B;margin-bottom:14px;display:none;}
+.auth-error.show{display:block;}
+.user-btn{width:34px;height:34px;border-radius:50%;background:var(--blue-light);border:2px solid var(--blue-mid);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--blue);cursor:pointer;flex-shrink:0;}
+.user-menu{position:fixed;top:60px;right:12px;background:white;border:1px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--shadow-lg);z-index:5000;min-width:200px;overflow:hidden;animation:toastIn 0.2s ease;}
+.user-menu-header{padding:14px 16px;border-bottom:1px solid var(--gray-100);}
+.user-menu-email{font-size:13px;color:var(--gray-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-menu-item{padding:13px 16px;font-size:14px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.15s;}
+.user-menu-item:hover{background:var(--gray-50);}
+.user-menu-item.danger{color:var(--red);}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:auto;flex-shrink:0;}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+.picker-overlay.closing{animation:fadeOut 0.3s ease forwards;}
+.picker-overlay.closing .picker{animation:slideDown 0.3s cubic-bezier(0.4,0,1,1) forwards;}
+.modal-overlay.closing{animation:fadeOut 0.3s ease forwards;}
+.modal-overlay.closing .modal{animation:slideDown 0.3s cubic-bezier(0.4,0,1,1) forwards;}
+
+/* MULTI SELECT */
+.select-bar{position:fixed;top:0;left:0;right:0;z-index:8000;background:var(--gray-900);color:white;display:flex;align-items:center;gap:12px;padding:14px 16px;transform:translateY(-100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);}
+.select-bar.show{transform:translateY(0);}
+.select-bar-count{font-size:15px;font-weight:600;flex:1;}
+.select-bar-btn{padding:8px 16px;border-radius:20px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.select-bar-btn.collect{background:var(--blue);color:white;}
+.select-bar-btn.cancel{background:rgba(255,255,255,0.15);color:white;}
+.pcard.selected{border-color:var(--blue) !important;}
+.pcard.selected .pcard-main{background:var(--blue-light);}
+.pselect-circle{width:24px;height:24px;border-radius:50%;border:2px solid var(--gray-300);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.15s;}
+.pcard.selected .pselect-circle{background:var(--blue);border-color:var(--blue);color:white;}
+
+/* TOASTS */
+.toast-area{position:fixed;bottom:calc(var(--nav-h) + 8px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:calc(100% - 32px);max-width:320px;}
+.toast{background:white;border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow-lg);border:1px solid var(--gray-200);animation:toastIn 0.3s cubic-bezier(0.16,1,0.3,1);pointer-events:all;}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.toast.tl{border-left:3px solid var(--blue);}
+.toast.ts{border-left:3px solid var(--green);}
+.toast.te{border-left:3px solid var(--red);}
+.t-spin{width:18px;height:18px;border:2.5px solid var(--gray-200);border-top-color:var(--blue);border-radius:50%;animation:spin 0.75s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.t-ico{font-size:18px;flex-shrink:0;}
+.t-title{font-size:13px;font-weight:600;color:var(--gray-900);}
+.t-sub{font-size:11.5px;color:var(--gray-500);margin-top:1px;}
+.t-prog{height:2px;background:var(--gray-100);margin-top:8px;border-radius:2px;overflow:hidden;}
+.t-bar{height:100%;background:var(--blue);border-radius:2px;animation:tprog 14s linear forwards;}
+@keyframes tprog{from{width:0%;}to{width:95%;}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splashScreen" style="position:fixed;inset:0;background:linear-gradient(160deg,#0D1259 0%,#1A2FB8 45%,#3B5BDB 100%);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity 0.55s ease,visibility 0.55s ease;">
+  <div style="position:relative;width:72px;height:88px;display:flex;align-items:flex-start;justify-content:center;">
+    <div style="width:72px;height:72px;background:linear-gradient(180deg,rgba(255,255,255,0.88) 0%,rgba(255,255,255,0.55) 100%);border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;display:flex;align-items:center;justify-content:center;font-size:26px;">✈</div>
+    <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:22px solid rgba(255,255,255,0.55);"></div>
+  </div>
+  <div style="font-family:'Poppins',sans-serif;font-size:40px;font-weight:800;color:white;letter-spacing:-0.5px;line-height:1;">Hoplist</div>
+  <div style="font-family:'Inter',sans-serif;font-size:14px;color:rgba(255,255,255,0.65);letter-spacing:0.04em;">Your travel wishlist</div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="homePage">
+  <div class="home-header">
+    <div class="home-top">
+      <div class="logo"><div class="logo-icon">✈</div><div class="logo-text">Hoplist</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="hstats">
+          <div><div class="hstat-num" id="hsSaved">0</div><div class="hstat-lbl">Saved</div></div>
+          <div><div class="hstat-num" id="hsVisited">0</div><div class="hstat-lbl">Visited</div></div>
+          <div><div class="hstat-num" id="hsCountries">0</div><div class="hstat-lbl">Countries</div></div>
+        </div>
+        <button class="user-btn" id="userBtn" onclick="toggleUserMenu()">👤</button>
+      </div>
+    </div>
+    <div class="add-row">
+      <input class="add-input" id="addInput" placeholder="Paste a link or type a place…" autocomplete="off"/>
+      <button class="add-btn" id="addBtn">+</button>
+    </div>
+    <div class="tabs-row">
+      <button class="htab active" data-tab="all">All</button>
+      <button class="htab" data-tab="wishlist">Wishlist</button>
+      <button class="htab" data-tab="visited">Visited</button>
+    </div>
+    <div class="search-row">
+      <span class="search-icon">🔍</span>
+      <input id="searchInput" placeholder="Search your places…"/>
+    </div>
+  </div>
+  <div class="place-list" id="placeList"></div>
+</div>
+
+<!-- COLLECTIONS PAGE -->
+<div class="page" id="collectionsPage">
+  <div class="col-header">
+    <div class="col-title">Collections</div>
+    <button class="col-new-btn" onclick="openNewColModal()">+</button>
+  </div>
+  <div class="col-list" id="colList"></div>
+</div>
+
+<!-- MAP PAGE -->
+<div class="page map-page" id="mapPage">
+  <div id="map"></div>
+  <button id="locateMeBtn" onclick="locateMe()" style="position:absolute;right:12px;bottom:calc(var(--nav-h) + 100px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:none;background:white;box-shadow:0 2px 10px rgba(0,0,0,0.2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100">📍</button>
+  <div class="map-search-bar">
+    <div class="map-search-inner">
+      <span class="ms-icon">🔍</span>
+      <input class="ms-input" id="msInput" placeholder="Search your saved places…"/>
+      <button class="ms-clear" id="msClear">✕</button>
+    </div>
+  </div>
+  <div class="map-chips" id="mapChips">
+    <button class="mchip active" data-f="all">All</button>
+    <button class="mchip" data-f="restaurant"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E8472A;margin-right:5px;vertical-align:middle"></span>Restaurants</button>
+    <button class="mchip" data-f="cafe"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8B5E3C;margin-right:5px;vertical-align:middle"></span>Cafes</button>
+    <button class="mchip" data-f="bar"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7C3AED;margin-right:5px;vertical-align:middle"></span>Bars</button>
+    <button class="mchip" data-f="hotel"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0EA5E9;margin-right:5px;vertical-align:middle"></span>Hotels</button>
+    <button class="mchip" data-f="beach"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-right:5px;vertical-align:middle"></span>Beaches</button>
+    <button class="mchip" data-f="museum"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6366F1;margin-right:5px;vertical-align:middle"></span>Museums</button>
+    <button class="mchip" data-f="nature"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#15803D;margin-right:5px;vertical-align:middle"></span>Nature</button>
+    <button class="mchip" data-f="attraction"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#DB2777;margin-right:5px;vertical-align:middle"></span>Attractions</button>
+    <button class="mchip" data-f="market"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EA580C;margin-right:5px;vertical-align:middle"></span>Markets</button>
+    <button class="mchip" data-f="shop"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D97706;margin-right:5px;vertical-align:middle"></span>Shopping</button>
+    <button class="mchip" data-f="visited"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;margin-right:5px;vertical-align:middle"></span>Visited</button>
+  </div>
+  <div class="map-bottom-stats" id="mapStats"></div>
+  <div id="mapPreviewCard" style="display:none;position:absolute;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 10px);left:12px;right:12px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.15);overflow:hidden;animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1);z-index:200;">
+    <div id="mapPreviewInner" onclick="openSheetFromPreview()" style="display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;">
+      <div id="mapPreviewThumb" style="width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--gray-100);"></div>
+      <div style="flex:1;min-width:0;">
+        <div id="mapPreviewName" style="font-weight:700;font-size:14px;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <div id="mapPreviewMeta" style="font-size:12px;color:var(--gray-500);margin-top:2px;"></div>
+      </div>
+      <div style="font-size:12px;color:var(--blue);font-weight:600;flex-shrink:0;">Details →</div>
+    </div>
+  </div>
+</div>
+
+<!-- COLLECTION DETAIL (full-screen overlay) -->
+<div class="col-detail-page" id="colDetailPage">
+  <div class="col-detail-hero" id="colDetailHero">
+    <div class="col-detail-hero-bg" id="colDetailBg"></div>
+    <div class="col-detail-hero-grad"></div>
+    <div class="col-detail-hero-content">
+      <button class="col-detail-back" onclick="closeColDetail()">←</button>
+      <div class="col-detail-emoji" id="colDetailEmoji"></div>
+      <div class="col-detail-name" id="colDetailName"></div>
+      <button class="col-date-pill" id="colDatePill" onclick="openDateModal()"></button>
+      <div class="col-detail-meta" style="margin-top:10px">
+        <div class="col-detail-stat" id="colDetailMeta"></div>
+        <button class="col-detail-share" onclick="regenCover(currentColId)" style="margin-left:0">🎨</button>
+        <button class="col-detail-share" onclick="openCollectionMap()">🗺️</button>
+        <button class="col-detail-share" id="colDetailCollabBtn" style="display:none;background:rgba(16,185,129,0.3)" onclick="openCollabAddPicker()">＋ Add places</button>
+        <button class="col-detail-share" onclick="openCollabModal()">👥 Collab</button>
+        <button class="col-detail-share" id="colDetailShareBtn" onclick="shareCollection()">🔗 Share</button>
+      </div>
+    </div>
+  </div>
+  <div id="colDetailSections" style="flex-shrink:0"></div>
+  <div class="col-detail-places" id="colDetailPlaces" style="flex:1;overflow-y:auto;padding-bottom:80px;"></div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-logo">
+    <div class="auth-logo-icon">✈</div>
+    <div class="auth-logo-text">Hoplist</div>
+  </div>
+  <div class="auth-tagline">Your travel wishlist, beautifully organized</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="auth-submit" id="authSubmit" onclick="doAuth()">Sign In</button>
+  </div>
+</div>
+
+<!-- USER MENU -->
+<div class="user-menu" id="userMenu" style="display:none;">
+  <div class="user-menu-header">
+    <div style="font-size:13px;font-weight:600;color:var(--gray-900)" id="userMenuName"></div>
+    <div class="user-menu-email" id="userMenuEmail"></div>
+  </div>
+  <div class="user-menu-item" onclick="syncNow()">🔄 Sync now<div class="sync-dot" id="syncDot"></div></div>
+  <div class="user-menu-item danger" onclick="doLogout()">🚪 Sign out</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-page="homePage"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+  <button class="nav-btn" data-page="collectionsPage"><span class="nav-icon">🗂️</span><span class="nav-label">Collections</span></button>
+  <button class="nav-btn" data-page="mapPage"><span class="nav-icon">🗺️</span><span class="nav-label">Map</span></button>
+</nav>
+
+<!-- SHARE PAGE (shown when ?share= param detected) -->
+<div class="share-page" id="sharePage">
+  <div class="share-hero">
+    <div class="share-hero-bg" id="shareHeroBg"></div>
+    <div class="share-hero-grad"></div>
+    <div class="share-hero-content">
+      <div class="share-brand">📍 Hoplist</div>
+      <div class="share-emoji" id="shareEmoji"></div>
+      <div class="share-name" id="shareName"></div>
+      <div class="share-meta" id="shareMeta"></div>
+    </div>
+  </div>
+  <div class="share-map-wrap"><div id="shareMap"></div></div>
+  <div class="share-places" id="sharePlaces"></div>
+  <div class="share-footer">
+    <button class="share-gmaps-btn" id="shareSaveBtn" onclick="saveSharedCollection()" style="display:none;background:#10B981">⭐ Save to my Hoplist</button>
+    <button class="share-gmaps-btn" id="shareLoginBtn" onclick="shareLoginToSave()" style="display:none;background:#10B981">⭐ Login to save</button>
+    <a class="share-gmaps-btn" id="shareGmapsBtn" href="#" target="_blank">🗺️ Open in Google Maps</a>
+    <button class="share-roamy-btn" onclick="closeSharePage()">✕</button>
+  </div>
+</div>
+
+<div class="select-bar" id="selectBar">
+  <div class="select-bar-count" id="selectCount">0 selected</div>
+  <button class="select-bar-btn collect" onclick="collectSelected()">🗂 Collect</button>
+  <button class="select-bar-btn cancel" onclick="exitSelectMode()">✕ Cancel</button>
+</div>
+
+<!-- COLLAB PAGE -->
+<div class="share-page" id="collabPage">
+  <div class="share-hero">
+    <div class="share-hero-bg" id="collabHeroBg"></div>
+    <div class="share-hero-grad"></div>
+    <div class="share-hero-content">
+      <div class="share-brand">👥 Collaborative Collection</div>
+      <div class="share-emoji" id="collabEmoji"></div>
+      <div class="share-name" id="collabName"></div>
+      <div class="share-meta" id="collabMeta"></div>
+    </div>
+  </div>
+  <div class="share-map-wrap"><div id="collabMap"></div></div>
+  <div class="share-places" id="collabPlaces"></div>
+  <div class="share-footer">
+    <button class="share-gmaps-btn" id="collabJoinBtn" onclick="joinCollabCollection()" style="background:#10B981">⭐ Join this collection</button>
+    <button class="share-roamy-btn" onclick="closeCollabPage()">✕</button>
+  </div>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUB3onJ3flQWXBR0iJmo2YRIpy1QfOmBo&callback=onGoogleMapsReady&v=weekly" async defer></script>
+<script>
+const BACKEND = "https://roamy-backend.onrender.com";
+const FLAGS = {"France":"🇫🇷","Italy":"🇮🇹","Japan":"🇯🇵","United States":"🇺🇸","Spain":"🇪🇸","Greece":"🇬🇷","Thailand":"🇹🇭","United Kingdom":"🇬🇧","Germany":"🇩🇪","Portugal":"🇵🇹","Mexico":"🇲🇽","Brazil":"🇧🇷","Australia":"🇦🇺","Netherlands":"🇳🇱","Sweden":"🇸🇪","Norway":"🇳🇴","Denmark":"🇩🇰","Switzerland":"🇨🇭","Austria":"🇦🇹","Turkey":"🇹🇷","Morocco":"🇲🇦","Egypt":"🇪🇬","South Africa":"🇿🇦","India":"🇮🇳","China":"🇨🇳","South Korea":"🇰🇷","Vietnam":"🇻🇳","Indonesia":"🇮🇩","Singapore":"🇸🇬","Malaysia":"🇲🇾","New Zealand":"🇳🇿","Canada":"🇨🇦","Argentina":"🇦🇷","Peru":"🇵🇪","Colombia":"🇨🇴","Chile":"🇨🇱","Israel":"🇮🇱","UAE":"🇦🇪","Czech Republic":"🇨🇿","Poland":"🇵🇱","Hungary":"🇭🇺","Croatia":"🇭🇷","Iceland":"🇮🇸","Ireland":"🇮🇪","Belgium":"🇧🇪","Finland":"🇫🇮","Romania":"🇷🇴","Philippines":"🇵🇭","Cambodia":"🇰🇭","Maldives":"🇲🇻","Jordan":"🇯🇴","Tanzania":"🇹🇿","Kenya":"🇰🇪","Georgia":"🇬🇪","Lebanon":"🇱🇧","Montenegro":"🇲🇪","Albania":"🇦🇱"};
+const EMOJIS={"restaurant":"🍽️","cafe":"☕","bar":"🍸","cocktail bar":"🍸","hotel":"🏨","museum":"🏛️","beach":"🏖️","park":"🌿","market":"🛍️","temple":"⛩️","church":"⛪","viewpoint":"🌄","attraction":"🎭","neighborhood":"🏘️","nature":"🏔️","shop":"🛍️","spa":"💆","club":"🎵","street":"🛤️","island":"🏝️","waterfall":"💦","castle":"🏰","gallery":"🖼️","winery":"🍷","brewery":"🍺","rooftop":"🌆","lake":"🏞️","cave":"🕳️"};
+const CATEGORY_COLORS={"restaurant":"#E8472A","cafe":"#8B5E3C","bar":"#7C3AED","cocktail bar":"#7C3AED","hotel":"#0EA5E9","museum":"#6366F1","beach":"#F59E0B","park":"#16A34A","market":"#EA580C","temple":"#DC2626","church":"#DC2626","viewpoint":"#0891B2","attraction":"#DB2777","neighborhood":"#64748B","nature":"#15803D","shop":"#D97706","spa":"#9D174D","club":"#4F46E5","street":"#64748B","island":"#0284C7","waterfall":"#0369A1","castle":"#7E22CE","gallery":"#BE185D","winery":"#9F1239","brewery":"#92400E","rooftop":"#0F766E","lake":"#0369A1","cave":"#78350F","default":"#3B5BDB"};
+const COL_EMOJIS=["🗺️","✈️","🏖️","🍽️","🎌","🌍","🌏","🌎","🏔️","🏙️","🌴","🍜","🥂","🎭","🛍️","🏛️","🌺","🗼","🎪","🏰","⛩️","🌊","🎿","🌅"];
+const COL_COLORS=["#3B5BDB","#7C3AED","#DB2777","#EA580C","#16A34A","#0891B2","#DC2626","#374151","#0F766E","#9D174D","#92400E","#2F4AC7"];
+
+const flag=c=>FLAGS[c]||"🌍";
+const emo=t=>EMOJIS[t?.toLowerCase()]||"📍";
+const priceStr=p=>p?"$".repeat(p):"";
+const EXAMPLES=[{l:"🍽️ Noma, Copenhagen",v:"Noma restaurant Copenhagen"},{l:"🏖️ Railay Beach, Thailand",v:"Railay Beach Thailand"},{l:"🌆 Amalfi Coast, Italy",v:"Amalfi Coast Italy"},{l:"⛩️ Fushimi Inari, Kyoto",v:"Fushimi Inari Kyoto Japan"}];
+const ALL_CATS=[{k:"restaurant",l:"🍽 Restaurant"},{k:"cafe",l:"☕ Cafe"},{k:"bar",l:"🍸 Bar"},{k:"hotel",l:"🏨 Hotel"},{k:"museum",l:"🏛 Museum"},{k:"beach",l:"🏖 Beach"},{k:"park",l:"🌿 Park"},{k:"market",l:"🛍 Market"},{k:"shop",l:"🛒 Shop"},{k:"temple",l:"⛩ Temple"},{k:"church",l:"⛪ Church"},{k:"viewpoint",l:"🌄 Viewpoint"},{k:"attraction",l:"🎭 Attraction"},{k:"nature",l:"🏔 Nature"},{k:"neighborhood",l:"🏘 Neighborhood"},{k:"spa",l:"💆 Spa"},{k:"club",l:"🎵 Club"},{k:"island",l:"🏝 Island"},{k:"waterfall",l:"💦 Waterfall"},{k:"castle",l:"🏰 Castle"},{k:"gallery",l:"🖼 Gallery"},{k:"winery",l:"🍷 Winery"},{k:"brewery",l:"🍺 Brewery"},{k:"rooftop",l:"🌆 Rooftop"},{k:"lake",l:"🏞 Lake"},{k:"cave",l:"🕳 Cave"}];
+
+// ── State ──────────────────────────────────────────────────────────────────
+var places=[];var collections=[];
+var tab="all";var search="";var mapSearch="";var mapFilter="all";
+var collapsed={};var markers={};var map;var mapInited=false;
+var googleMapsReady=false;var pendingMapInit=false;
+var currentColId=null;
+
+// ── AUTH & SYNC ────────────────────────────────────────────────────────────
+// Migrate token key from old "roamy_token" to "hoplist_token"
+if(!localStorage.getItem("hoplist_token")&&localStorage.getItem("roamy_token")){localStorage.setItem("hoplist_token",localStorage.getItem("roamy_token"));localStorage.removeItem("roamy_token");}
+var authToken = localStorage.getItem("hoplist_token") || null;
+var currentUser = null;
+var syncTimeout = null;
+
+function authHeaders(){return{"Content-Type":"application/json","Authorization":"Bearer "+authToken};}
+
+async function initAuth(){
+  if(window._isShareMode){return;} // share page needs no auth
+  if(!authToken){showAuthScreen();return;}
+  try{
+    var res=await fetch(BACKEND+"/auth/me",{headers:authHeaders()});
+    if(!res.ok){authToken=null;localStorage.removeItem("hoplist_token");showAuthScreen();return;}
+    var data=await res.json();
+    currentUser=data.user;
+    hideAuthScreen();
+    await syncFromServer();
+  }catch(e){
+    // Offline — load local data and continue
+    hideAuthScreen();
+    loadLocal();
+  }
+}
+
+function showAuthScreen(){document.getElementById("authScreen").style.display="flex";}
+function hideAuthScreen(){document.getElementById("authScreen").style.display="none";}
+
+async function doAuth(){
+  var email=document.getElementById("authEmail").value.trim();
+  var password=document.getElementById("authPassword").value;
+  var isLogin=document.getElementById("loginTab").classList.contains("active");
+  var errEl=document.getElementById("authError");
+  var btn=document.getElementById("authSubmit");
+  errEl.classList.remove("show");
+  if(!email||!password){errEl.textContent="Please fill in all fields.";errEl.classList.add("show");return;}
+  btn.disabled=true;btn.textContent=isLogin?"Signing in…":"Creating account…";
+  try{
+    var res=await fetch(BACKEND+"/auth/"+(isLogin?"login":"register"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+    var data=await res.json();
+    if(!res.ok){errEl.textContent=data.error||"Something went wrong";errEl.classList.add("show");return;}
+    authToken=data.token;currentUser=data.user;
+    localStorage.setItem("hoplist_token",authToken);
+    if(!isLogin){
+      // New registration — migrate any pre-existing local places to this new account
+      var localData=loadLocal();
+      if(localData&&(localData.places.length>0||localData.collections.length>0)){
+        places=localData.places;collections=localData.collections;
+        await pushToServer();
+      } else {
+        places=[];collections=[];
+      }
+    } else {
+      // Login — always load from server, never use local data from another account
+      places=[];collections=[];
+      await syncFromServer();
+    }
+    hideAuthScreen();
+    renderList();renderCollections();
+    showToast("auth","ts","Welcome"+(isLogin?" back":"")+", "+currentUser.email.split("@")[0]+"! ✈","");
+    // If came from collab invite
+    if(window._pendingCollabToken){
+      var ct=window._pendingCollabToken;window._pendingCollabToken=null;
+      setTimeout(function(){openCollabPage(ct);},600);
+    }
+    // If came from share page to save
+    if(window._pendingSaveShare){
+      currentShareData=window._pendingSaveShare;
+      window._pendingSaveShare=null;
+      setTimeout(saveSharedCollection,600);
+    }
+  }catch(e){
+    errEl.textContent="Connection error. Check your internet.";errEl.classList.add("show");
+  }finally{btn.disabled=false;btn.textContent=isLogin?"Sign In":"Create Account";}
+}
+
+function switchAuthTab(tab){
+  var isLogin=tab==="login";
+  document.getElementById("loginTab").classList.toggle("active",isLogin);
+  document.getElementById("registerTab").classList.toggle("active",!isLogin);
+  document.getElementById("authSubmit").textContent=isLogin?"Sign In":"Create Account";
+  document.getElementById("authError").classList.remove("show");
+  document.getElementById("authPassword").autocomplete=isLogin?"current-password":"new-password";
+}
+
+document.getElementById("authEmail").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("authPassword").focus();});
+document.getElementById("authPassword").addEventListener("keydown",function(e){if(e.key==="Enter")doAuth();});
+
+function doLogout(){
+  authToken=null;currentUser=null;
+  localStorage.removeItem("hoplist_token");
+  localStorage.removeItem("hoplist_v8");
+  places=[];collections=[];
+  document.getElementById("userMenu").style.display="none";
+  renderList();renderCollections();
+  showAuthScreen();
+}
+
+function toggleUserMenu(){
+  var menu=document.getElementById("userMenu");
+  if(menu.style.display==="none"){
+    document.getElementById("userMenuEmail").textContent=currentUser?.email||"";
+    document.getElementById("userMenuName").textContent=currentUser?.email?.split("@")[0]||"";
+    menu.style.display="block";
+    document.addEventListener("click",closeMenuOutside,{once:true,capture:true});
+  } else {menu.style.display="none";}
+}
+
+function closeMenuOutside(e){
+  var menu=document.getElementById("userMenu");
+  var btn=document.getElementById("userBtn");
+  if(menu&&!menu.contains(e.target)&&!btn.contains(e.target))menu.style.display="none";
+}
+
+// ── DATA PERSISTENCE ──────────────────────────────────────────────────────
+function save(){
+  // Save locally always
+  try{localStorage.setItem("hoplist_v8",JSON.stringify({places:places,collections:collections}));}catch(e){}
+  // Debounce server sync
+  if(authToken){clearTimeout(syncTimeout);syncTimeout=setTimeout(pushToServer,1500);}
+}
+
+function loadLocal(){
+  try{
+    var d=localStorage.getItem("hoplist_v8")||localStorage.getItem("roamy_v8");if(d){var p=JSON.parse(d);return{places:Array.isArray(p)?p:(p.places||[]),collections:p.collections||[]};}
+    var d7=localStorage.getItem("roamy_v7");if(d7){var p7=JSON.parse(d7);return{places:Array.isArray(p7)?p7:(p7.places||[]),collections:[]};}
+    var d6=localStorage.getItem("roamy_v6");if(d6){var p6=JSON.parse(d6);return{places:Array.isArray(p6)?p6:(p6.places||[]),collections:[]};}
+  }catch(e){}
+  return{places:[],collections:[]};
+}
+
+function load(){
+  var data=loadLocal();
+  places=data.places;collections=data.collections;
+}
+
+async function syncFromServer(){
+  if(!authToken)return;
+  // If a push is pending, flush it first so we don't overwrite local changes
+  if(syncTimeout){
+    clearTimeout(syncTimeout);
+    syncTimeout=null;
+    await pushToServer();
+  }
+  try{
+    setSyncing(true);
+    var res=await fetch(BACKEND+"/sync",{headers:authHeaders()});
+    if(!res.ok)return;
+    var data=await res.json();
+    places=data.places||[];
+    collections=data.collections||[];
+    try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+    setSyncing(false);
+    renderList();renderCollections();if(mapInited)renderMapMarkers();
+  }catch(e){setSyncing(false);}
+}
+
+async function pushToServer(){
+  if(!authToken)return;
+  try{
+    setSyncing(true);
+    await fetch(BACKEND+"/sync",{method:"POST",headers:authHeaders(),body:JSON.stringify({places,collections})});
+    setSyncing(false);
+  }catch(e){setSyncing(false);}
+}
+
+async function syncNow(){
+  document.getElementById("userMenu").style.display="none";
+  showToast("sync","tl","Syncing…","");
+  await syncFromServer();
+  hideToast("sync");
+  showToast("sync","ts","Synced!","Your data is up to date");
+}
+
+function setSyncing(val){
+  var dot=document.getElementById("syncDot");
+  if(dot)dot.classList.toggle("syncing",val);
+}
+
+// ── INVITE HANDLER ─────────────────────────────────────────────────────────
+async function handleInvite(token){
+  if(!authToken){showToast("inv","te","Sign in first","You need an account to accept invites");return;}
+  try{
+    var res=await fetch(BACKEND+"/invites/"+token,{headers:authHeaders()});
+    var data=await res.json();
+    if(!res.ok){showToast("inv","te","Invite invalid",data.error||"");return;}
+    await syncFromServer();
+    showToast("inv","ts","Collection added!","Check your Collections tab");
+  }catch(e){showToast("inv","te","Failed","Could not accept invite");}
+}
+
+
+load();
+
+// ── GOOGLE MAPS CALLBACK ───────────────────────────────────────────────────
+// ── NAV ────────────────────────────────────────────────────────────────────
+// ── UNIVERSAL SWIPE TO DISMISS ─────────────────────────────────────────────
+function enableSwipeDismiss(overlayId, dismissFn){
+  var overlay=document.getElementById(overlayId);
+  if(!overlay)return;
+  var sheet=overlay.querySelector(".bsheet,.sheet,.picker");
+  var handle=overlay.querySelector(".bsheet-handle,#sheetHandleZone,.picker-handle");
+  if(!sheet||!handle)return;
+
+  var startY=0,lastY=0,startT=0,dragging=false;
+
+  handle.addEventListener("touchstart",function(e){
+    startY=e.touches[0].clientY;
+    lastY=startY;startT=Date.now();dragging=true;
+    sheet.style.transition="none";
+  },{passive:true});
+
+  handle.addEventListener("touchmove",function(e){
+    if(!dragging)return;
+    var y=e.touches[0].clientY;
+    var delta=y-startY;lastY=y;
+    if(delta>0){
+      sheet.style.transform="translateY("+delta+"px)";
+      var opacity=Math.max(0,0.5-delta/500);
+      overlay.style.background="rgba(15,23,42,"+opacity+")";
+    }
+  },{passive:true});
+
+  handle.addEventListener("touchend",function(){
+    if(!dragging)return;dragging=false;
+    var delta=lastY-startY;
+    var velocity=delta/(Date.now()-startT);
+    sheet.style.transition="";overlay.style.background="";
+    if(delta>110||velocity>0.4){
+      sheet.style.transform="translateY(100%)";
+      sheet.style.transition="transform 0.28s cubic-bezier(0.4,0,1,1)";
+      setTimeout(dismissFn,280);
+    } else {
+      sheet.style.transform="translateY(0)";
+      sheet.style.transition="transform 0.3s cubic-bezier(0.16,1,0.3,1)";
+      setTimeout(function(){sheet.style.transform="";sheet.style.transition="";},300);
+    }
+  },{passive:true});
+}
+
+
+function closeAllOverlays(){
+  ["sheetOverlay","pickerOverlay","colModal","addToColModal","shareModal","secModal","moveSec","dateModal","collabSetupModal","collabAddModal"].forEach(function(id){var el=document.getElementById(id);if(el)el.remove();});
+  var colMap=document.getElementById("colMapOverlay");if(colMap)colMap.remove();
+  var detail=document.getElementById("colDetailPage");
+  if(detail&&detail.classList.contains("open")){
+    detail.classList.remove("open","closing");detail.style.display="none";
+    _collabAllPlaces=null;currentCollabToken=null;currentColId=null;
+  }
+}
+
+// ── BACK BUTTON STACK ──────────────────────────────────────────────────────
+// We push states when overlays open, pop them on Android back
+function pushBackState(name){
+  history.pushState({overlay:name},"","");
+}
+
+window.addEventListener("popstate",function(e){
+  if(selectMode){exitSelectMode();return;}
+  if(document.getElementById("colMapOverlay")){document.getElementById("colMapOverlay").remove();return;}
+  if(document.getElementById("moveSec")){document.getElementById("moveSec").remove();return;}
+  if(document.getElementById("dateModal")){document.getElementById("dateModal").remove();return;}
+  if(document.getElementById("secModal")){document.getElementById("secModal").remove();return;}
+  if(document.getElementById("shareModal")){document.getElementById("shareModal").remove();return;}
+  if(document.getElementById("colModal")){document.getElementById("colModal").remove();return;}
+  if(document.getElementById("addToColModal")){document.getElementById("addToColModal").remove();return;}
+  if(document.getElementById("pickerOverlay")){closePicker();return;}
+  if(document.getElementById("sheetOverlay")){closeSheet();return;}
+  var detail=document.getElementById("colDetailPage");
+  if(detail&&detail.classList.contains("open")){closeColDetail();return;}
+});
+
+// Push initial state so back button has somewhere to go
+history.pushState({root:true},"","");
+
+// ── NAV ─────────────────────────────────────────────────────────────────────
+try{document.querySelectorAll(".nav-btn").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    var pid=btn.dataset.page;
+    // Close everything before switching pages
+    closeAllOverlays();
+    document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active");});
+    document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
+    btn.classList.add("active");
+    document.getElementById(pid).classList.add("active");
+    if(pid==="mapPage"){
+      if(!googleMapsReady){pendingMapInit=true;return;}
+      if(!mapInited)initMap();
+      else{google.maps.event.trigger(map,"resize");renderMapMarkers();}
+      renderMapStats();
+    }
+    if(pid==="collectionsPage") renderCollections();
+  });
+});}catch(e){console.error("Nav error:",e);}
+
+// ── MAP ────────────────────────────────────────────────────────────────────
+var userLocationMarker=null;
+
+function initMap(){
+  map=new google.maps.Map(document.getElementById("map"),{
+    center:{lat:20,lng:10},zoom:2,
+    gestureHandling:"greedy",
+    streetViewControl:false,mapTypeControl:false,fullscreenControl:false,
+    zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_BOTTOM},
+    styles:[{featureType:"poi",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"labels.icon",stylers:[{visibility:"off"}]}]
+  });
+  mapInited=true;
+  renderMapMarkers();
+  // Show user location
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var latlng={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      if(userLocationMarker)userLocationMarker.setMap(null);
+      userLocationMarker=new google.maps.Marker({position:latlng,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#2563EB",fillOpacity:1,strokeColor:"white",strokeWeight:3},title:"You are here",zIndex:999});
+    },function(){},{enableHighAccuracy:true,timeout:8000});
+  }
+}
+
+function locateMe(){
+  if(!navigator.geolocation){showToast("loc","te","Location not supported","");return;}
+  showToast("loc","tl","Finding location…","");
+  navigator.geolocation.getCurrentPosition(function(pos){
+    hideToast("loc");
+    var latlng={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    if(userLocationMarker)userLocationMarker.setMap(null);
+    userLocationMarker=new google.maps.Marker({position:latlng,map:map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#2563EB",fillOpacity:1,strokeColor:"white",strokeWeight:3},title:"You are here",zIndex:999});
+    map.panTo(latlng);
+    if(map.getZoom()<13)map.setZoom(14);
+  },function(){
+    hideToast("loc");
+    showToast("loc","te","Location unavailable","Enable location in browser settings");
+  },{enableHighAccuracy:true,timeout:10000});
+}
+
+function getCatColor(type){
+  if(!type)return CATEGORY_COLORS.default;
+  if(CATEGORY_COLORS[type.toLowerCase()])return CATEGORY_COLORS[type.toLowerCase()];
+  var colors=["#6366F1","#EC4899","#14B8A6","#F97316","#8B5CF6","#06B6D4","#84CC16","#EF4444"];
+  var hash=0;for(var i=0;i<type.length;i++)hash=type.charCodeAt(i)+((hash<<5)-hash);
+  return colors[Math.abs(hash)%colors.length];
+}
+
+function makeMarkerEl(p){
+  var color=p.visited?"#10B981":getCatColor(p.type);
+  var div=document.createElement("div");
+  div.style.cssText="display:flex;flex-direction:column;align-items:center;cursor:pointer;";
+  div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+color+';border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><div style="width:8px;height:8px;border-radius:50%;background:white;opacity:0.9;"></div></div><div style="width:2px;height:8px;background:'+color+';opacity:0.7;border-radius:0 0 2px 2px;"></div>';
+  return div;
+}
+
+function getMapFiltered(){
+  return places.filter(function(p){
+    if(!p.lat||!p.lng)return false;
+    if(mapFilter==="visited")return p.visited;
+    if(mapFilter!=="all"&&p.type!==mapFilter)return false;
+    if(mapSearch.trim()){var q=mapSearch.toLowerCase();return(p.name||"").toLowerCase().includes(q)||(p.city||"").toLowerCase().includes(q)||(p.country||"").toLowerCase().includes(q);}
+    return true;
+  });
+}
+
+var mapPreviewPlaceId=null;
+
+function showMapPreview(p){
+  mapPreviewPlaceId=p.id;
+  var card=document.getElementById("mapPreviewCard");
+  var thumb=document.getElementById("mapPreviewThumb");
+  document.getElementById("mapPreviewName").textContent=p.name;
+  var meta=[p.type||"place",p.city,p.rating?"★ "+p.rating.toFixed(1):null].filter(Boolean).join(" · ");
+  document.getElementById("mapPreviewMeta").textContent=meta;
+  thumb.innerHTML=p.photoUrl?'<img src="'+p.photoUrl+'" style="width:100%;height:100%;object-fit:cover"/>'
+    :'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;">'+emo(p.type)+'</div>';
+  card.style.display="block";
+}
+
+function hideMapPreview(){
+  document.getElementById("mapPreviewCard").style.display="none";
+  mapPreviewPlaceId=null;
+}
+
+function openSheetFromPreview(){
+  if(mapPreviewPlaceId)openSheet(mapPreviewPlaceId);
+}
+
+function renderMapMarkers(){
+  if(!mapInited)return;
+  Object.keys(markers).forEach(function(id){if(markers[id])markers[id].setMap(null);});
+  markers={};
+  hideMapPreview();
+  getMapFiltered().forEach(function(p){
+    var color=p.visited?"#10B981":getCatColor(p.type);
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34"><circle cx="13" cy="13" r="11" fill="'+color+'" stroke="white" stroke-width="2.5"/><circle cx="13" cy="13" r="4" fill="white" opacity="0.9"/><line x1="13" y1="24" x2="13" y2="34" stroke="'+color+'" stroke-width="2" stroke-linecap="round"/></svg>';
+    var icon={url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(26,34),anchor:new google.maps.Point(13,34)};
+    var m=new google.maps.Marker({position:{lat:p.lat,lng:p.lng},map:map,icon:icon,title:p.name,optimized:false});
+    m.addListener("click",function(){showMapPreview(p);});
+    markers[p.id]=m;
+  });
+  // Hide preview when tapping map background
+  if(map&&!map._previewListenerSet){
+    map.addListener("click",function(){hideMapPreview();});
+    map._previewListenerSet=true;
+  }
+  renderMapStats();
+}
+
+function renderMapStats(){
+  var el=document.getElementById("mapStats");if(!el)return;
+  var total=places.length;var vis=places.filter(function(p){return p.visited;}).length;
+  el.innerHTML='<div class="mstat"><div class="mstat-dot" style="background:#2563EB"></div>'+total+' saved</div><div class="mstat"><div class="mstat-dot" style="background:#10B981"></div>'+vis+' visited</div>';
+}
+
+document.getElementById("msInput").addEventListener("input",function(e){mapSearch=e.target.value;document.getElementById("msClear").classList.toggle("show",mapSearch.length>0);renderMapMarkers();});
+document.getElementById("msClear").addEventListener("click",function(){mapSearch="";document.getElementById("msInput").value="";this.classList.remove("show");renderMapMarkers();});
+document.querySelectorAll(".mchip").forEach(function(c){c.addEventListener("click",function(){document.querySelectorAll(".mchip").forEach(function(x){x.classList.remove("active");});c.classList.add("active");mapFilter=c.dataset.f;renderMapMarkers();});});
+
+// ── COLLECTIONS ────────────────────────────────────────────────────────────
+var _collabAllPlaces=null; // set when a collab collection is open; overrides getColPlaces
+
+function getColPlaces(col){
+  if(_collabAllPlaces!==null&&col&&col.collabToken)return _collabAllPlaces;
+  return (col.placeIds||[]).map(function(id){return places.find(function(p){return p.id===id;});}).filter(Boolean);
+}
+
+function getColCover(col){
+  // Prefer AI-generated cover
+  if(col.aiCover)return col.aiCover;
+  // Fall back to first place photo
+  var ps=getColPlaces(col);
+  for(var i=0;i<ps.length;i++){if(ps[i].photoUrl)return ps[i].photoUrl;}
+  return null;
+}
+
+function getColCountries(col){
+  var ps=getColPlaces(col);
+  var countries={};
+  ps.forEach(function(p){if(p.country)countries[p.country]=1;});
+  return Object.keys(countries);
+}
+
+function renderCollections(){
+  var list=document.getElementById("colList");
+  if(collections.length===0){
+    list.innerHTML='<div class="col-empty"><div class="col-empty-icon">🗂️</div><div class="col-empty-title">No collections yet</div><div class="col-empty-sub">Group your places into beautiful collections — Tokyo Trip, Honeymoon Ideas, Best Restaurants...</div><button class="col-create-btn" onclick="openNewColModal()">+ Create Collection</button></div>';
+    return;
+  }
+  list.innerHTML=collections.map(function(col){
+    var cover=getColCover(col);
+    var ps=getColPlaces(col);
+    var countries=getColCountries(col);
+    var bgStyle=cover?'background-image:url('+cover+')':'background:'+col.color;
+    var countryFlags=countries.slice(0,4).map(function(c){return flag(c);}).join('');
+    return'<div class="col-card" onclick="openColDetail(\''+col.id+'\')">'+
+      '<div class="col-card-bg" style="'+bgStyle+'"></div>'+
+      '<div class="col-card-gradient"></div>'+
+      '<div class="col-card-actions">'+
+      '<button class="col-card-btn edit" onclick="event.stopPropagation();openEditColModal(\''+col.id+'\')">✏️</button>'+
+      '<button class="col-card-btn share" onclick="event.stopPropagation();shareCollectionById(\''+col.id+'\')">🔗</button>'+
+      '<button class="col-card-btn edit" onclick="event.stopPropagation();regenCover(\''+col.id+'\')" title="Regenerate cover">🎨</button>'+
+      '</div>'+
+      '<div class="col-card-body">'+
+      '<span class="col-card-emoji">'+col.emoji+'</span>'+
+      '<div class="col-card-name">'+col.name+'</div>'+
+      '<div class="col-card-meta">'+
+      '<div class="col-card-stat">📍 '+ps.length+' place'+(ps.length!==1?'s':'')+(col.isCollab?' · 👥 Collab':'')+'</div>'+
+      (countries.length?'<div class="col-card-stat">'+countryFlags+' '+countries.length+' countr'+(countries.length!==1?'ies':'y')+'</div>':'')+
+      '</div></div></div>';
+  }).join('');
+}
+
+// ── DATE HELPERS ───────────────────────────────────────────────────────────
+function formatDateRange(s,e){
+  if(!s)return null;
+  var opts={month:"short",day:"numeric"};
+  var sd=new Date(s+"T12:00:00");var ed=e?new Date(e+"T12:00:00"):null;
+  var str=sd.toLocaleDateString("en-US",opts);
+  if(ed&&e!==s)str+=" – "+ed.toLocaleDateString("en-US",{month:sd.getMonth()===ed.getMonth()?"numeric":"short",day:"numeric"});
+  return str;
+}
+function getCountdown(s,e){
+  if(!s)return null;
+  var now=new Date();now.setHours(0,0,0,0);
+  var start=new Date(s+"T12:00:00");start.setHours(0,0,0,0);
+  var end=e?new Date(e+"T12:00:00"):start;end.setHours(0,0,0,0);
+  var msDay=86400000;
+  if(now<start){var d=Math.round((start-now)/msDay);return"In "+d+" day"+(d!==1?"s":"");}
+  if(now<=end){var d2=Math.round((end-now)/msDay);return d2===0?"Last day!":"Ongoing · "+d2+"d left";}
+  var d3=Math.round((now-end)/msDay);return d3===0?"Just finished":""+d3+" day"+(d3!==1?"s":"")+" ago";
+}
+
+async function patchCollabState(){
+  if(!currentCollabToken||!authToken)return;
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  try{
+    await fetch(BACKEND+"/collab/"+currentCollabToken+"/state",{method:"PATCH",headers:authHeaders(),body:JSON.stringify({sections:col.sections||[],sectionMap:col.sectionMap||{}})});
+  }catch(e){console.log("collab state patch failed:",e);}
+}
+
+async function refreshCollabDetail(){
+  if(!currentCollabToken||!currentColId)return;
+  try{
+    var res=await fetch(BACKEND+"/collab/"+currentCollabToken);
+    var data=await res.json();
+    if(!data.success)return;
+    collabData=data;
+    _collabAllPlaces=data.places||[];
+    var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+    var virtualCol=Object.assign({},col,{sections:data.sharedState.sections||[],sectionMap:data.sharedState.sectionMap||{}});
+    collections=collections.map(function(c){return c.id===currentColId?virtualCol:c;});
+    activeSecId=null;
+    renderColDetailPlaces(virtualCol);
+    var ps=_collabAllPlaces;
+    var countries={};ps.forEach(function(p){if(p.country)countries[p.country]=1;});
+    var metaEl=document.getElementById("colDetailMeta");
+    if(metaEl)metaEl.textContent=ps.length+" place"+(ps.length!==1?"s":"")+(Object.keys(countries).length?" · "+Object.keys(countries).map(function(c){return flag(c);}).join(""):"");
+  }catch(e){console.log("collab refresh failed:",e);}
+}
+
+function openColDetail(colId){
+  try{
+  var col=collections.find(function(c){return c.id===colId;});
+  if(!col)return;
+  currentColId=colId;
+  _collabAllPlaces=null;
+  var cover=getColCover(col);
+  var ps=getColPlaces(col);
+  var countries=getColCountries(col);
+  var bg=document.getElementById("colDetailBg");
+  bg.style.cssText="position:absolute;inset:0;background-size:cover;background-position:center;";
+  if(cover){bg.style.backgroundImage="url("+cover+")";bg.style.backgroundColor="";}
+  else{bg.style.backgroundImage="none";bg.style.backgroundColor=col.color||"#2563EB";}
+  document.getElementById("colDetailEmoji").textContent=col.emoji||"🗺️";
+  document.getElementById("colDetailName").textContent=col.name||"Collection";
+  document.getElementById("colDetailMeta").textContent=ps.length+" place"+(ps.length!==1?"s":"")+(countries.length?" · "+countries.map(function(c){return flag(c);}).join(""):"");
+  var collabBtn=document.getElementById("colDetailCollabBtn");
+  if(collabBtn){collabBtn.style.display=(col.isCollab&&col.collabToken)?"flex":"none";}
+  var pill=document.getElementById("colDatePill");
+  if(col.startDate){
+    var dateStr=formatDateRange(col.startDate,col.endDate);
+    var cd=getCountdown(col.startDate,col.endDate);
+    pill.innerHTML="🗓 "+dateStr+(cd?' <span class="col-date-countdown">· '+cd+"</span>":'');
+    pill.classList.remove("no-date");
+  } else {
+    pill.innerHTML="🗓 Add trip dates";
+    pill.classList.add("no-date");
+  }
+  activeSecId=null;
+  renderColDetailPlaces(col);
+  document.getElementById("colDetailPage").style.display="flex";
+  pushBackState("colDetail");
+  requestAnimationFrame(function(){requestAnimationFrame(function(){document.getElementById("colDetailPage").classList.add("open");});});
+  if(col.collabToken&&authToken){currentCollabToken=col.collabToken;refreshCollabDetail();}
+  else{currentCollabToken=null;}
+  }catch(e){console.error("openColDetail error:",e);showToast("err","te","Error opening collection",e.message);}
+}
+
+var sectionCollapsed={};
+
+var activeSecId=null;
+
+function renderColDetailPlaces(col){
+  if(!col)col=collections.find(function(c){return c.id===currentColId;});
+  if(!col)return;
+  var ps=getColPlaces(col);
+  var sections=col.sections||[];
+  var sectionMap=col.sectionMap||{};
+  var allSectionedIds=Object.values(sectionMap).flat();
+  var unsorted=ps.filter(function(p){return!allSectionedIds.includes(p.id);});
+  var hasSections=sections.length>0;
+  var accentColor=col.color||"var(--blue)";
+  if(!activeSecId||(activeSecId!=="__all"&&activeSecId!=="__unsorted"&&!sections.find(function(s){return s.id===activeSecId;}))){activeSecId="__all";}
+  var tabsEl=document.getElementById("colDetailSections");
+  if(!tabsEl)return;
+  if(ps.length===0&&!hasSections){
+    tabsEl.innerHTML="";
+    document.getElementById("colDetailPlaces").innerHTML='<div class="empty" style="padding-top:40px"><div class="empty-icon">📍</div><div class="empty-title">No places yet</div><div class="empty-sub">Add places using the 🗂️ Collect button on any place</div></div>';
+    return;
+  }
+  var tabsHtml='<div class="sec-tabs-wrap"><div class="sec-tabs">';
+  if(hasSections){
+    tabsHtml+='<button class="sec-tab'+(activeSecId==="__all"?" active":"")+'" onclick="switchTab(\'__all\')">All <span class="sec-tab-count">'+ps.length+'</span></button>';
+    sections.forEach(function(sec){
+      var cnt=(sectionMap[sec.id]||[]).length;
+      tabsHtml+='<button class="sec-tab'+(activeSecId===sec.id?" active":"")+'" onclick="switchTab(\''+sec.id+'\')">'+sec.name+' <span class="sec-tab-count">'+cnt+'</span><span class="sec-tab-edit" onclick="event.stopPropagation();openSecModal(\''+sec.id+'\')">✏️</span></button>';
+    });
+    if(unsorted.length>0){tabsHtml+='<button class="sec-tab'+(activeSecId==="__unsorted"?" active":"")+'" onclick="switchTab(\'__unsorted\')">Unsorted <span class="sec-tab-count">'+unsorted.length+'</span></button>';}
+    tabsHtml+='<button class="sec-add-tab" onclick="openNewSecModal()">＋</button>';
+  }
+  tabsHtml+='</div></div>';
+  tabsEl.innerHTML=tabsHtml;
+  setTimeout(function(){var at=tabsEl.querySelector(".sec-tab.active");if(at)at.scrollIntoView({inline:"center",behavior:"smooth"});},50);
+  var contentPlaces=[];
+  if(!hasSections||activeSecId==="__all")contentPlaces=ps;
+  else if(activeSecId==="__unsorted")contentPlaces=unsorted;
+  else{var sids=sectionMap[activeSecId]||[];contentPlaces=sids.map(function(id){return ps.find(function(p){return p.id===id;});}).filter(Boolean);}
+  var listEl=document.getElementById("colDetailPlaces");
+  var html="";
+  var secCtx=(hasSections&&activeSecId!=="__all"&&activeSecId!=="__unsorted")?activeSecId:null;
+  contentPlaces.forEach(function(p){html+=renderColPlaceCard(p,secCtx,accentColor);});
+  if(secCtx){html+='<button class="sec-add-place-btn" onclick="assignPlaceToSection(\''+secCtx+'\')">＋ Add place to this section</button>';}
+  if(!hasSections){html+='<button style="display:flex;align-items:center;gap:8px;padding:10px 16px;color:var(--gray-400);font-size:13px;cursor:pointer;border:none;background:transparent;font-family:Inter,sans-serif;width:100%" onclick="openNewSecModal()">＋ Add sections</button>';}
+  listEl.innerHTML=html||'<div class="empty" style="padding-top:32px"><div class="empty-icon">📍</div><div class="empty-title">Empty section</div><div class="empty-sub">Tap + to add places</div></div>';
+}
+
+function switchTab(secId){activeSecId=secId;renderColDetailPlaces();}
+function toggleSection(){}
+
+// ── COLLECTION MAP ──────────────────────────────────────────────────────────
+function openCollectionMap(){
+  if(!googleMapsReady){showToast("cmap","te","Map still loading","Try again");return;}
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var allPs=getColPlaces(col).filter(function(p){return p.lat&&p.lng;});
+  if(allPs.length===0){showToast("cmap","te","No locations","Places need coordinates to appear on map");return;}
+  var ex=document.getElementById("colMapOverlay");if(ex)ex.remove();
+
+  // Get unique types for filter chips
+  var types=[...new Set(allPs.map(function(p){return p.type||"other";}).filter(Boolean))];
+  var chipColors={restaurant:"#E8472A",cafe:"#8B5E3C",bar:"#7C3AED",hotel:"#0EA5E9",museum:"#6366F1",beach:"#F59E0B",park:"#16A34A",market:"#EA580C",shop:"#D97706",nature:"#15803D",attraction:"#DB2777"};
+  var chips='<button class="mchip active" id="cmchip-all" onclick="colMapFilter(\'all\')">All</button>';
+  types.forEach(function(t){
+    var c=chipColors[t]||"#6366F1";
+    chips+='<button class="mchip" id="cmchip-'+t+'" onclick="colMapFilter(\''+t+'\')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c+';margin-right:4px;vertical-align:middle"></span>'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>';
+  });
+
+  var overlay=document.createElement("div");
+  overlay.id="colMapOverlay";
+  overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));z-index:5000;background:white;display:flex;flex-direction:column;animation:fadeIn 0.2s ease;";
+  overlay.innerHTML=
+    '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:white;border-bottom:1px solid #eee;flex-shrink:0;">'+
+    '<button onclick="document.getElementById(\'colMapOverlay\').remove()" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--gray-100);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>'+
+    '<div style="font-size:16px;font-weight:700;color:var(--gray-900);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+(col.emoji||"🗺️")+' '+col.name+'</div>'+
+    '<div style="font-size:12px;color:var(--gray-400);flex-shrink:0" id="colMapCount">'+allPs.length+' places</div>'+
+    '</div>'+
+    (types.length>1?'<div class="map-chips" style="flex-shrink:0;background:white;border-bottom:1px solid #eee;">'+chips+'</div>':'')+
+    '<div style="flex:1;min-height:0;position:relative;">'+
+    '<div id="colMapDiv" style="position:absolute;inset:0;"></div>'+
+    '<div id="colMapPreview" style="display:none;position:absolute;bottom:10px;left:12px;right:12px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.15);overflow:hidden;z-index:100;">'+
+    '<div id="colMapPreviewInner" style="display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;">'+
+    '<div id="colMapPreviewThumb" style="width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--gray-100)"></div>'+
+    '<div style="flex:1;min-width:0"><div id="colMapPreviewName" style="font-weight:700;font-size:14px;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>'+
+    '<div id="colMapPreviewMeta" style="font-size:12px;color:var(--gray-500);margin-top:2px"></div></div>'+
+    '<div style="font-size:12px;color:var(--blue);font-weight:600;flex-shrink:0">Details →</div>'+
+    '</div></div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+  pushBackState("colMap");
+
+  // Wait for browser to paint the overlay before initialising the map
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+  var colMap=new google.maps.Map(document.getElementById("colMapDiv"),{
+    zoom:2,center:{lat:20,lng:10},
+    gestureHandling:"greedy",
+    streetViewControl:false,mapTypeControl:false,fullscreenControl:false,
+    zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_CENTER}
+  });
+
+  // User location
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      new google.maps.Marker({position:{lat:pos.coords.latitude,lng:pos.coords.longitude},map:colMap,icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#2563EB",fillOpacity:1,strokeColor:"white",strokeWeight:3},title:"You are here",zIndex:999});
+    },function(){},{enableHighAccuracy:true,timeout:8000});
+  }
+
+  var colMapMarkers=[];
+  var colMapInfWin=new google.maps.InfoWindow();
+  var colMapFilter="all";
+
+  function colMapPreviewShow(p){
+    var preview=document.getElementById("colMapPreview");
+    var thumb=document.getElementById("colMapPreviewThumb");
+    document.getElementById("colMapPreviewName").textContent=p.name;
+    document.getElementById("colMapPreviewMeta").textContent=[p.type||"place",p.city,p.rating?"★ "+p.rating.toFixed(1):null,p.addedByName?"by "+p.addedByName:null].filter(Boolean).join(" · ");
+    thumb.innerHTML=p.photoUrl?'<img src="'+p.photoUrl+'" style="width:100%;height:100%;object-fit:cover"/>'
+      :'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px">'+emo(p.type)+'</div>';
+    document.getElementById("colMapPreviewInner").onclick=function(){
+      document.getElementById("colMapOverlay").remove();
+      // For collab places (cp... id), look in _collabAllPlaces too
+      var found=places.find(function(x){return x.id===p.id;});
+      if(found)openSheet(p.id);
+    };
+    preview.style.display="block";
+  }
+
+  function renderColMapMarkers(){
+    colMapMarkers.forEach(function(m){m.setMap(null);});
+    colMapMarkers=[];
+    document.getElementById("colMapPreview").style.display="none";
+    var filtered=allPs.filter(function(p){return colMapFilter==="all"||(p.type||"other")===colMapFilter;});
+    document.getElementById("colMapCount").textContent=filtered.length+" places";
+    var bounds=new google.maps.LatLngBounds();
+    filtered.forEach(function(p){
+      var color=getCatColor(p.type);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="22" height="28"><circle cx="11" cy="11" r="9" fill="'+color+'" stroke="white" stroke-width="2"/><circle cx="11" cy="11" r="3.5" fill="white" opacity="0.9"/><line x1="11" y1="20" x2="11" y2="28" stroke="'+color+'" stroke-width="2" stroke-linecap="round"/></svg>';
+      var icon={url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(22,28),anchor:new google.maps.Point(11,28)};
+      var marker=new google.maps.Marker({position:{lat:p.lat,lng:p.lng},map:colMap,icon:icon,title:p.name});
+      marker.addListener("click",function(){colMapPreviewShow(p);});
+      colMapMarkers.push(marker);
+      bounds.extend({lat:p.lat,lng:p.lng});
+    });
+    if(!bounds.isEmpty())colMap.fitBounds(bounds,{top:40,right:40,bottom:40,left:40});
+  }
+
+  // Expose filter function to global scope for chip buttons
+  window.colMapFilter=function(f){
+    colMapFilter=f;
+    document.querySelectorAll("#colMapOverlay .mchip").forEach(function(c){c.classList.remove("active");});
+    var chip=document.getElementById("cmchip-"+f);
+    if(chip)chip.classList.add("active");
+    renderColMapMarkers();
+  };
+
+  colMap.addListener("click",function(){document.getElementById("colMapPreview").style.display="none";});
+  renderColMapMarkers();
+  });});// end rAF
+}
+
+function renderColPlaceCard(p,secId,accentColor){
+  var thumb=p.photoUrl?'<div class="pthumb"><img src="'+p.photoUrl+'" onerror="this.parentElement.innerHTML=\'<div class=pthumb-emo>'+emo(p.type)+'</div>\'" loading="lazy"/></div>':'<div class="pthumb"><div class="pthumb-emo">'+emo(p.type)+'</div></div>';
+  var rating=p.rating?'<span class="prating">★ '+p.rating.toFixed(1)+'</span>':"";
+  var vtag=p.visited?'<span class="pvis-tag">✓</span>':"";
+  var attribution=p.addedByName?'<div style="font-size:10.5px;color:var(--gray-400);margin-top:1px">by '+p.addedByName+'</div>':"";
+  // Collab places can be removed by who added them or owner
+  var isOwner=collabData&&currentUser&&collabData.ownerId===currentUser.id;
+  var isAdder=p.addedByName&&currentUser&&(isOwner||(p.addedById&&p.addedById===currentUser.id));
+  var removeBtn=p.addedByName&&isAdder?'<button onclick="event.stopPropagation();removeCollabPlace(\''+p.id+'\')" style="padding:5px 9px;background:var(--gray-100);border:none;border-radius:8px;color:var(--gray-400);font-size:12px;cursor:pointer;flex-shrink:0;margin-right:4px">✕</button>':"";
+  var secBadgeLabel=secId?"Move":"＋ Section";
+  var secBadge='<button class="sec-place-badge" onclick="event.stopPropagation();moveToSection(\''+p.id+'\','+(secId?'\''+secId+'\'':'null')+')" style="'+(secId&&accentColor?'border-color:'+accentColor+';color:'+accentColor+';background:'+accentColor+'18':'')+'" >'+secBadgeLabel+'</button>';
+  return'<div style="padding:0 12px 3px"><div class="pcard"><div class="pcard-main" onclick="openSheet(\''+p.id+'\')">'+thumb+'<div class="pinfo"><div class="pname">'+p.name+'</div><div class="pmeta"><span class="ptype-tag">'+emo(p.type)+' '+(p.type||'place')+'</span>'+rating+vtag+'</div>'+attribution+'</div>'+removeBtn+secBadge+'</div></div></div>';
+}
+
+
+
+
+// ── SECTION MODALS ─────────────────────────────────────────────────────────
+function openNewSecModal(){
+  var ex=document.getElementById("secModal");if(ex)ex.remove();
+  var html='<div class="modal-overlay" id="secModal" onclick="closeSecModal(event)">'+
+    '<div class="bsheet">'+
+    '<div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad"><div class="bsheet-title">New Section</div>'+
+    '<input class="modal-input" id="secNameInput" placeholder="e.g. Day 1, Restaurants, Must Visit…"/>'+
+    '<div class="modal-btns"><button class="mbtn secondary" onclick="document.getElementById(\'secModal\').remove()">Cancel</button><button class="mbtn primary" onclick="saveNewSection()">Add</button></div>'+
+    '</div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  pushBackState("secModal");
+  enableSwipeDismiss("secModal",function(){document.getElementById("secModal")?.remove();});
+}
+
+function openSecModal(secId){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sec=(col.sections||[]).find(function(s){return s.id===secId;});if(!sec)return;
+  var ex=document.getElementById("secModal");if(ex)ex.remove();
+  var html='<div class="modal-overlay" id="secModal" onclick="closeSecModal(event)">'+
+    '<div class="bsheet">'+
+    '<div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad"><div class="bsheet-title">Edit Section</div>'+
+    '<input class="modal-input" id="secNameInput" placeholder="Section name…" value="'+sec.name+'"/>'+
+    '<div class="modal-btns"><button class="mbtn secondary" style="color:var(--red)" onclick="deleteSection(\''+secId+'\')">Delete</button><button class="mbtn primary" onclick="renameSection(\''+secId+'\')">Save</button></div>'+
+    '</div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  pushBackState("secModal");
+  enableSwipeDismiss("secModal",function(){document.getElementById("secModal")?.remove();});
+}
+
+function closeSecModal(e){if(e.target.id==="secModal")document.getElementById("secModal").remove();}
+
+function saveNewSection(){
+  var name=document.getElementById("secNameInput")?.value.trim();if(!name)return;
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var secId="sec"+Date.now();
+  var sections=(col.sections||[]).concat([{id:secId,name:name}]);
+  var sectionMap=Object.assign({},col.sectionMap||{});sectionMap[secId]=[];
+  collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{sections:sections,sectionMap:sectionMap}):c;});
+  save();document.getElementById("secModal")?.remove();
+  renderColDetailPlaces();
+  if(currentCollabToken)patchCollabState();
+}
+
+function renameSection(secId){
+  var name=document.getElementById("secNameInput")?.value.trim();if(!name)return;
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sections=(col.sections||[]).map(function(s){return s.id===secId?Object.assign({},s,{name:name}):s;});
+  collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{sections:sections}):c;});
+  save();document.getElementById("secModal")?.remove();
+  renderColDetailPlaces();
+  if(currentCollabToken)patchCollabState();
+}
+
+function deleteSection(secId){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sections=(col.sections||[]).filter(function(s){return s.id!==secId;});
+  var sectionMap=Object.assign({},col.sectionMap||{});
+  delete sectionMap[secId];
+  collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{sections:sections,sectionMap:sectionMap}):c;});
+  save();document.getElementById("secModal")?.remove();
+  renderColDetailPlaces();
+  if(currentCollabToken)patchCollabState();
+}
+
+// ── MOVE PLACE TO SECTION ──────────────────────────────────────────────────
+function moveToSection(placeId,currentSecId){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sections=col.sections||[];
+  if(sections.length===0){openNewSecModal();return;}
+  var ex=document.getElementById("moveSec");if(ex)ex.remove();
+  var items=sections.map(function(sec){
+    var isCurrent=currentSecId===sec.id;
+    return'<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--gray-100);cursor:pointer;'+(isCurrent?"background:var(--blue-light)":"")+'" onclick="doMoveToSection(\''+placeId+'\',\''+currentSecId+'\',\''+sec.id+'\')">'+
+      '<div style="flex:1;font-size:14px;font-weight:600;color:var(--gray-900)">'+sec.name+'</div>'+
+      (isCurrent?'<span style="color:var(--blue);font-size:13px">Current</span>':'<span style="color:var(--gray-400);font-size:13px">Move here</span>')+
+      '</div>';
+  }).join('');
+  var removeRow=currentSecId?'<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer" onclick="doMoveToSection(\''+placeId+'\',\''+currentSecId+'\',null)"><div style="flex:1;font-size:14px;font-weight:600;color:var(--gray-500)">Remove from section</div></div>':'';
+  var html='<div class="modal-overlay" id="moveSec" onclick="this.id===\'moveSec\'&&this.remove()"><div class="modal" style="padding:0;overflow:hidden">'+
+    '<div style="padding:20px 16px 14px"><div class="modal-handle" style="margin:0 auto 16px"></div><div style="font-size:17px;font-weight:700;color:var(--gray-900)">Move to Section</div></div>'+
+    '<div style="max-height:50vh;overflow-y:auto">'+items+removeRow+'</div>'+
+    '<div style="padding:14px 16px"><button class="mbtn secondary" style="width:100%" onclick="document.getElementById(\'moveSec\').remove()">Cancel</button></div>'+
+    '</div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  pushBackState("moveSec");
+}
+
+function doMoveToSection(placeId,fromSecId,toSecId){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sectionMap=JSON.parse(JSON.stringify(col.sectionMap||{}));
+  // Remove from current section
+  if(fromSecId&&sectionMap[fromSecId]){sectionMap[fromSecId]=sectionMap[fromSecId].filter(function(id){return id!==placeId;});}
+  // Add to new section
+  if(toSecId){if(!sectionMap[toSecId])sectionMap[toSecId]=[];if(!sectionMap[toSecId].includes(placeId))sectionMap[toSecId].push(placeId);}
+  collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{sectionMap:sectionMap}):c;});
+  save();document.getElementById("moveSec")?.remove();
+  renderColDetailPlaces();
+  if(currentCollabToken)patchCollabState();
+}
+
+function assignPlaceToSection(secId){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sectionMap=col.sectionMap||{};
+  var sectionedIds=Object.values(sectionMap).flat();
+  var unsorted=getColPlaces(col).filter(function(p){return!sectionedIds.includes(p.id);});
+  if(unsorted.length===0){showToast("sec","te","No unsorted places","All places are already in sections");return;}
+  var ex=document.getElementById("moveSec");if(ex)ex.remove();
+  var items=unsorted.map(function(p){
+    return'<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--gray-100);cursor:pointer" onclick="doMoveToSection(\''+p.id+'\',null,\''+secId+'\')">'+
+      '<div style="font-size:20px">'+emo(p.type)+'</div>'+
+      '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--gray-900)">'+p.name+'</div><div style="font-size:12px;color:var(--gray-400)">'+(p.city||"")+(p.country?", "+p.country:"")+'</div></div>'+
+      '</div>';
+  }).join('');
+  var html='<div class="modal-overlay" id="moveSec" onclick="this.id===\'moveSec\'&&this.remove()"><div class="modal" style="padding:0;overflow:hidden">'+
+    '<div style="padding:20px 16px 14px"><div class="modal-handle" style="margin:0 auto 16px"></div><div style="font-size:17px;font-weight:700;color:var(--gray-900)">Add to section</div></div>'+
+    '<div style="max-height:50vh;overflow-y:auto">'+items+'</div>'+
+    '<div style="padding:14px 16px"><button class="mbtn secondary" style="width:100%" onclick="document.getElementById(\'moveSec\').remove()">Cancel</button></div>'+
+    '</div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  pushBackState("moveSec");
+}
+
+// ── DATE MODAL ─────────────────────────────────────────────────────────────
+function openDateModal(){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var ex=document.getElementById("dateModal");if(ex)ex.remove();
+  var html='<div class="modal-overlay" id="dateModal" onclick="this.id===\'dateModal\'&&this.remove()">'+
+    '<div class="bsheet">'+
+    '<div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad"><div class="bsheet-title">Trip Dates</div>'+
+    '<div class="date-row" style="margin-bottom:10px"><div class="date-field"><label>From</label><input type="date" id="dm-start" value="'+(col.startDate||"")+'"/></div><div class="date-field"><label>To</label><input type="date" id="dm-end" value="'+(col.endDate||"")+'"/></div></div>'+
+    '<div style="font-size:12px;color:var(--gray-400);margin-bottom:4px">Tip: adding dates auto-creates day sections.</div>'+
+    '<div class="modal-btns">'+(col.startDate?'<button class="mbtn secondary" style="color:var(--red)" onclick="clearDates()">Clear</button>':'')+
+    '<button class="mbtn secondary" onclick="document.getElementById(\'dateModal\').remove()">Cancel</button>'+
+    '<button class="mbtn primary" onclick="saveDates()">Save</button>'+
+    '</div></div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  pushBackState("dateModal");
+  enableSwipeDismiss("dateModal",function(){document.getElementById("dateModal")?.remove();});
+}
+
+function saveDates(){
+  var start=document.getElementById("dm-start")?.value||"";
+  var end=document.getElementById("dm-end")?.value||"";
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var sections=col.sections||[];
+  var sectionMap=col.sectionMap||{};
+  // Auto-create day sections if none exist and dates are set
+  if(start&&end&&sections.length===0){
+    var d1=new Date(start+"T12:00:00");var d2=new Date(end+"T12:00:00");
+    var numDays=Math.min(Math.round((d2-d1)/86400000)+1,14);
+    sections=[];sectionMap={};
+    for(var i=0;i<numDays;i++){
+      var d=new Date(d1.getTime()+i*86400000);
+      var label="Day "+(i+1)+" · "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+      var sid="sec"+Date.now()+i;
+      sections.push({id:sid,name:label});sectionMap[sid]=[];
+    }
+  }
+  collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{startDate:start,endDate:end,sections:sections,sectionMap:sectionMap}):c;});
+  save();document.getElementById("dateModal")?.remove();
+  openColDetail(currentColId);
+}
+
+function clearDates(){
+  collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{startDate:"",endDate:""}):c;});
+  save();document.getElementById("dateModal")?.remove();
+  openColDetail(currentColId);
+}
+
+function closeColDetail(){
+  var page=document.getElementById("colDetailPage");
+  page.classList.remove("open");
+  page.classList.add("closing");
+  _collabAllPlaces=null;
+  currentCollabToken=null;
+  setTimeout(function(){page.style.display="none";page.classList.remove("closing");currentColId=null;},350);
+}
+var editingColId=null;
+var selectedEmoji=COL_EMOJIS[0];
+var selectedColor=COL_COLORS[0];
+
+function openNewColModal(){
+  editingColId=null;selectedEmoji=COL_EMOJIS[0];selectedColor=COL_COLORS[0];
+  showColModal("","New Collection","Create");
+}
+
+function openEditColModal(id){
+  var col=collections.find(function(c){return c.id===id;});if(!col)return;
+  editingColId=id;selectedEmoji=col.emoji;selectedColor=col.color;
+  showColModal(col.name,"Edit Collection","Save");
+}
+
+function showColModal(nameVal,title,btnLabel){
+  var ex=document.getElementById("colModal");if(ex)ex.remove();
+  var col=editingColId?collections.find(function(c){return c.id===editingColId;}):null;
+  var startVal=col?.startDate||"";var endVal=col?.endDate||"";
+  var emojiGrid=COL_EMOJIS.map(function(e){return'<button class="emoji-opt'+(e===selectedEmoji?" selected":"")+'" onclick="selectEmoji(\''+e+'\')">'+e+'</button>';}).join('');
+  var colorGrid=COL_COLORS.map(function(c){return'<button class="color-opt'+(c===selectedColor?" selected":"")+'" style="background:'+c+'" onclick="selectColColor(\''+c+'\')"></button>';}).join('');
+  var delBtn=editingColId?'<button class="mbtn secondary" style="color:var(--red)" onclick="deleteCol()">Delete</button>':'';
+  var html='<div class="modal-overlay" id="colModal" onclick="closeColModal(event)">'+
+    '<div class="bsheet">'+
+    '<div class="bsheet-handle" id="colModalHandle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad">'+
+    '<div class="bsheet-title">'+title+'</div>'+
+    '<input class="modal-input" id="colNameInput" placeholder="Collection name…" value="'+nameVal+'"/>'+
+    '<div class="modal-label">Trip Dates (optional)</div>'+
+    '<div class="date-row" style="margin-bottom:14px"><div class="date-field"><label>From</label><input type="date" id="colStartDate" value="'+startVal+'"/></div><div class="date-field"><label>To</label><input type="date" id="colEndDate" value="'+endVal+'"/></div></div>'+
+    '<div class="modal-label">Icon</div><div class="emoji-grid">'+emojiGrid+'</div>'+
+    '<div class="modal-btns"><button class="mbtn secondary" onclick="document.getElementById(\'colModal\').remove()">Cancel</button>'+delBtn+'<button class="mbtn primary" onclick="saveCol()">'+btnLabel+'</button></div>'+
+    '</div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("colModal",function(){document.getElementById("colModal")?.remove();});
+}
+
+function closeColModal(e){if(e.target.id==="colModal")document.getElementById("colModal").remove();}
+function selectEmoji(e){selectedEmoji=e;document.querySelectorAll(".emoji-opt").forEach(function(el){el.classList.toggle("selected",el.textContent===e);});}
+function selectColColor(c){selectedColor=c;document.querySelectorAll(".color-opt").forEach(function(el){el.classList.toggle("selected",el.style.background===c||el.style.backgroundColor===c);});}
+
+async function saveCol(){
+  var name=document.getElementById("colNameInput").value.trim();
+  if(!name)return;
+  var btn=document.querySelector("#colModal .mbtn.primary");
+  if(btn){btn.disabled=true;btn.textContent="Saving…";}
+  var startDate=document.getElementById("colStartDate")?.value||"";
+  var endDate=document.getElementById("colEndDate")?.value||"";
+  var colId=editingColId||('col'+Date.now());
+  var existingCol=editingColId?collections.find(function(c){return c.id===editingColId;}):null;
+  // Auto-create day sections when dates are newly added
+  var sections=existingCol?.sections||[];
+  var sectionMap=existingCol?.sectionMap||{};
+  var hadDates=existingCol?.startDate&&existingCol?.endDate;
+  if(startDate&&endDate&&!hadDates&&sections.length===0){
+    var d1=new Date(startDate);var d2=new Date(endDate);
+    var dayMs=86400000;var numDays=Math.round((d2-d1)/dayMs)+1;
+    numDays=Math.min(numDays,14);
+    sections=[];
+    for(var i=0;i<numDays;i++){
+      var d=new Date(d1.getTime()+i*dayMs);
+      var label="Day "+(i+1)+" · "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+      var sid="sec"+Date.now()+i;
+      sections.push({id:sid,name:label});
+      sectionMap[sid]=[];
+    }
+  }
+  var updatedCol={
+    id:colId,name:name,emoji:selectedEmoji,color:selectedColor,
+    placeIds:existingCol?existingCol.placeIds:[],
+    sections:sections,sectionMap:sectionMap,
+    startDate:startDate,endDate:endDate,
+    createdAt:existingCol?existingCol.createdAt:new Date().toISOString(),
+    aiCover:existingCol?.aiCover||null
+  };
+  if(editingColId){
+    collections=collections.map(function(c){return c.id===editingColId?updatedCol:c;});
+  } else {
+    collections.push(updatedCol);
+  }
+  save();
+  document.getElementById("colModal").remove();
+  renderCollections();
+  if(editingColId&&currentColId===editingColId)openColDetail(editingColId);
+  generateCoverForCol(colId);
+}
+
+async function generateCoverForCol(colId){
+  var col=collections.find(function(c){return c.id===colId;});
+  if(!col||!authToken)return;
+  var ps=getColPlaces(col);
+  console.log("Generating AI cover for:", col.name);
+  try{
+    var res=await fetch(BACKEND+"/generate-cover",{
+      method:"POST",
+      headers:authHeaders(),
+      body:JSON.stringify({collectionName:col.name,places:ps.map(function(p){return{name:p.name,city:p.city,country:p.country,type:p.type};}),emoji:col.emoji})
+    });
+    var data=await res.json();
+    if(data.imageUrl){
+      collections=collections.map(function(c){return c.id===colId?Object.assign({},c,{aiCover:data.imageUrl}):c;});
+      save();renderCollections();
+      if(currentColId===colId){
+        var bg=document.getElementById("colDetailBg");
+        if(bg){
+          bg.style.backgroundImage="url("+data.imageUrl+")";
+          bg.style.backgroundColor="";
+        }
+      }
+      console.log("AI cover generated for:", col.name);
+    }
+  }catch(e){console.log("Cover gen failed:",e.message);}
+}
+
+async function regenCover(colId){
+  if(!colId)return;
+  showToast("regen","tl","Generating cover…","AI is creating a travel image");
+  // Temporarily clear AI cover so it doesn't flash old one
+  collections=collections.map(function(c){return c.id===colId?Object.assign({},c,{aiCover:null}):c;});
+  renderCollections();
+  await generateCoverForCol(colId);
+  hideToast("regen");
+  showToast("regen","ts","New cover ready!","");
+}
+
+function deleteCol(){
+  if(!editingColId)return;
+  var deletedId=editingColId;
+  collections=collections.filter(function(c){return c.id!==deletedId;});
+  try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+  document.getElementById("colModal").remove();
+  if(currentColId===deletedId)closeColDetail();
+  renderCollections();
+  // Delete from server immediately
+  if(authToken){
+    fetch(BACKEND+"/collections/"+deletedId,{method:"DELETE",headers:authHeaders()}).catch(function(){});
+  }
+}
+
+// ── ADD TO COLLECTION ──────────────────────────────────────────────────────
+var colPickerState={}; // colId -> true/false (pending changes)
+var colPickerPlaceId=null;
+
+function openAddToCol(placeId){
+  var ex=document.getElementById("addToColModal");if(ex)ex.remove();
+  if(collections.length===0){showToast("col","te","No collections","Create a collection first");return;}
+  colPickerPlaceId=placeId;
+  // Init state from current membership
+  colPickerState={};
+  collections.forEach(function(col){colPickerState[col.id]=(col.placeIds||[]).includes(placeId);});
+  renderAddToColModal();
+}
+
+function renderAddToColModal(){
+  var ex=document.getElementById("addToColModal");if(ex)ex.remove();
+  var placeId=colPickerPlaceId;
+  var items=collections.map(function(col){
+    var selected=colPickerState[col.id];
+    return'<div class="col-picker-item'+(selected?" in-col":"")+'" onclick="colPickerToggle(\''+col.id+'\')">'+
+      '<div class="col-picker-emoji" style="background:'+col.color+'20">'+col.emoji+'</div>'+
+      '<div class="col-picker-name">'+col.name+'</div>'+
+      '<div class="col-picker-count">'+(col.placeIds||[]).length+' places</div>'+
+      '<div class="col-picker-check">'+(selected?"✓":"")+'</div>'+
+      '</div>';
+  }).join('');
+  var html='<div class="modal-overlay" id="addToColModal" onclick="closeAddToCol(event)">'+
+    '<div class="bsheet">'+
+    '<div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad"><div class="bsheet-title">Add to Collection</div>'+
+    '<div style="font-size:13px;color:var(--gray-500);margin-bottom:12px">Tap to select, then press Done</div>'+
+    '<div class="col-picker-list">'+items+'</div>'+
+    '<div class="modal-btns">'+
+    '<button class="mbtn secondary" onclick="document.getElementById(\'addToColModal\').remove()">Cancel</button>'+
+    '<button class="mbtn primary" onclick="saveColPicker()">Done</button>'+
+    '</div></div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("addToColModal",function(){document.getElementById("addToColModal")?.remove();});
+}
+
+function colPickerToggle(colId){
+  colPickerState[colId]=!colPickerState[colId];
+  // Update UI in place without re-rendering whole modal
+  var items=document.querySelectorAll("#addToColModal .col-picker-item");
+  var colIds=collections.map(function(c){return c.id;});
+  var idx=colIds.indexOf(colId);
+  if(idx>=0&&items[idx]){
+    var selected=colPickerState[colId];
+    items[idx].classList.toggle("in-col",selected);
+    var check=items[idx].querySelector(".col-picker-check");
+    if(check)check.textContent=selected?"✓":"";
+  }
+}
+
+function saveColPicker(){
+  var placeId=colPickerPlaceId;
+  if(!placeId){document.getElementById("addToColModal")?.remove();return;}
+  document.getElementById("addToColModal")?.remove();
+
+  var regularChanged=[];
+  var collabAdds=[]; // {token, place} for collab collections
+
+  collections.forEach(function(col){
+    var wasIn=(col.placeIds||[]).includes(placeId);
+    var nowIn=!!colPickerState[col.id];
+    if(wasIn===nowIn)return;
+
+    if(nowIn&&col.isCollab&&col.collabToken){
+      // Collab collection — must go through collab API, not placeIds
+      var place=places.find(function(p){return p.id===placeId;});
+      if(place)collabAdds.push({token:col.collabToken,place:place,colId:col.id});
+    } else {
+      // Regular collection — update placeIds normally
+      regularChanged.push(col.id);
+      collections=collections.map(function(c){
+        if(c.id!==col.id)return c;
+        var newIds=nowIn?(c.placeIds||[]).concat([placeId]):(c.placeIds||[]).filter(function(id){return id!==placeId;});
+        return Object.assign({},c,{placeIds:newIds});
+      });
+    }
+  });
+
+  // Save regular collection changes immediately
+  if(regularChanged.length>0){
+    try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+    if(authToken){clearTimeout(syncTimeout);pushToServer();}
+    renderList();renderCollections();
+    showToast("col","ts","Added to "+regularChanged.length+" collection"+(regularChanged.length>1?"s":"")+"!","");
+    regularChanged.forEach(function(colId){setTimeout(function(){generateCoverForCol(colId);},500);});
+  }
+
+  // Post collab places to server via collab API
+  if(collabAdds.length>0){
+    collabAdds.forEach(function(item){
+      var p=item.place;
+      fetch(BACKEND+"/collab/"+item.token+"/places",{
+        method:"POST",headers:authHeaders(),
+        body:JSON.stringify({place:{name:p.name,type:p.type,lat:p.lat,lng:p.lng,city:p.city,country:p.country,photoUrl:p.photoUrl,rating:p.rating}})
+      }).then(function(r){return r.json();}).then(function(data){
+        if(data.success){
+          showToast("col","ts","Added to collaborative collection!","");
+          // If this collab collection is currently open, refresh it
+          if(currentCollabToken===item.token)refreshCollabDetail();
+        }
+      }).catch(function(){showToast("col","te","Failed to add to collab collection","");});
+    });
+  }
+
+  if(regularChanged.length===0&&collabAdds.length===0){
+    showToast("col","ts","No changes","");
+  }
+}
+
+function closeAddToCol(e){if(e.target.id==="addToColModal")document.getElementById("addToColModal").remove();}
+
+function togglePlaceInCol(placeId,colId){
+  // Legacy — redirect to new flow
+  openAddToCol(placeId);
+}
+
+// ── SHARE COLLECTION ───────────────────────────────────────────────────────
+// ── COLLAB COLLECTIONS ─────────────────────────────────────────────────────
+var currentCollabToken=null;
+var collabData=null; // {collection, collabPlaces, ownerId}
+
+async function openCollabModal(){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var ex=document.getElementById("collabSetupModal");if(ex)ex.remove();
+  // Check if already collab enabled
+  var existingToken=col.collabToken||null;
+  var html='<div class="modal-overlay" id="collabSetupModal" onclick="this.id===\'collabSetupModal\'&&this.remove()">'+
+    '<div class="bsheet"><div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad">'+
+    '<div class="bsheet-title">👥 Collaborative Mode</div>'+
+    '<p style="font-size:14px;color:var(--gray-600);margin-bottom:20px;line-height:1.6">Invite friends to add their own places to this collection. Everyone needs a Hoplist account to contribute.</p>'+
+    (existingToken
+      ?'<div style="background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:var(--r-sm);padding:14px;margin-bottom:16px;font-size:13px;color:var(--blue);font-weight:600;">✓ Collaborative mode is ON</div>'+
+        '<div class="modal-btns">'+
+        '<button class="mbtn secondary" style="color:var(--red)" onclick="disableCollab()">Disable</button>'+
+        '<button class="mbtn primary" onclick="shareCollabLink(\''+existingToken+'\')">🔗 Share invite link</button>'+
+        '</div>'
+      :'<div class="modal-btns">'+
+        '<button class="mbtn secondary" onclick="document.getElementById(\'collabSetupModal\').remove()">Cancel</button>'+
+        '<button class="mbtn primary" onclick="enableCollab()">Enable Collaborative Mode</button>'+
+        '</div>'
+    )+
+    '</div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("collabSetupModal",function(){document.getElementById("collabSetupModal")?.remove();});
+}
+
+async function enableCollab(){
+  if(!authToken){showToast("collab","te","Sign in required","");return;}
+  document.getElementById("collabSetupModal")?.remove();
+  showToast("collab","tl","Enabling…","");
+  try{
+    var res=await fetch(BACKEND+"/collections/"+currentColId+"/collab",{method:"POST",headers:authHeaders()});
+    var data=await res.json();
+    if(!data.success)throw new Error(data.error);
+    hideToast("collab");
+    // Save token to collection locally
+    collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{collabToken:data.token}):c;});
+    save();
+    shareCollabLink(data.token);
+  }catch(e){hideToast("collab");showToast("collab","te","Failed",e.message);}
+}
+
+async function disableCollab(){
+  if(!authToken)return;
+  document.getElementById("collabSetupModal")?.remove();
+  try{
+    await fetch(BACKEND+"/collections/"+currentColId+"/collab",{method:"DELETE",headers:authHeaders()});
+    collections=collections.map(function(c){return c.id===currentColId?Object.assign({},c,{collabToken:null}):c;});
+    save();
+    showToast("collab","ts","Collaborative mode disabled","");
+  }catch(e){showToast("collab","te","Failed","");}
+}
+
+function shareCollabLink(token){
+  var url=window.location.origin+"/?collab="+token;
+  if(navigator.share){
+    navigator.share({title:"Join my Hoplist collection",url:url}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(url).then(function(){
+      showToast("collab","ts","Invite link copied!","Share it with friends");
+    }).catch(function(){
+      var ta=document.createElement("textarea");ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);
+      showToast("collab","ts","Link copied!","");
+    });
+  }
+}
+
+async function openCollabPage(token){
+  currentCollabToken=token;
+  showToast("collab","tl","Loading…","");
+  try{
+    var res=await fetch(BACKEND+"/collab/"+token);
+    var data=await res.json();
+    if(!data.success)throw new Error(data.error||"Not found");
+    hideToast("collab");
+    collabData=data;
+    renderCollabPage(data);
+  }catch(e){hideToast("collab");showToast("collab","te","Couldn't load",e.message);}
+}
+
+function renderCollabPage(data){
+  var col=data.collection;
+  var cp=data.collabPlaces||[];
+  var cover=cp.find(function(p){return p.photoUrl;})||null;
+  var bg=document.getElementById("collabHeroBg");
+  if(cover){bg.style.backgroundImage="url("+cover.photoUrl+")";}
+  else{bg.style.background=col.color||"#2563EB";bg.style.backgroundImage="";}
+  document.getElementById("collabEmoji").textContent=col.emoji||"🗺️";
+  document.getElementById("collabName").textContent=col.name;
+  document.getElementById("collabMeta").textContent=cp.length+" place"+(cp.length!==1?"s":"")+" · collaborative collection";
+  // Places list
+  var isOwner=authToken&&currentUser&&data.ownerId===currentUser.id;
+  var hasJoined=collections.some(function(c){return c.collabToken===currentCollabToken;});
+  document.getElementById("collabPlaces").innerHTML=cp.length===0
+    ?'<div class="empty" style="padding-top:40px"><div class="empty-icon">📍</div><div class="empty-title">No places yet</div><div class="empty-sub">Join and add places from your saves</div></div>'
+    :cp.map(function(p){
+      var thumb=p.photoUrl?'<div class="share-place-thumb"><img src="'+p.photoUrl+'" onerror="this.parentElement.innerHTML=\'<div class=share-place-thumb-emo>'+emo(p.type)+'</div>\'"/></div>':'<div class="share-place-thumb"><div class="share-place-thumb-emo">'+emo(p.type)+'</div></div>';
+      var canRemove=authToken&&currentUser&&(isOwner||(p.addedById&&p.addedById===currentUser.id));
+      return'<div class="share-place-card">'+thumb+
+        '<div class="share-place-info"><div class="share-place-name">'+p.name+'</div>'+
+        '<div class="share-place-sub">'+(p.city?p.city+", ":"")+p.country+'</div>'+
+        '<div style="font-size:11px;color:var(--gray-400);margin-top:2px">Added by '+p.addedByName+'</div></div>'+
+        (canRemove?'<button onclick="removeCollabPlace(\''+p.id+'\')" style="padding:6px 10px;background:var(--gray-100);border:none;border-radius:8px;color:var(--gray-500);font-size:12px;cursor:pointer;flex-shrink:0">✕</button>':'')+
+        '</div>';
+    }).join('');
+  // Update join button
+  var joinBtn=document.getElementById("collabJoinBtn");
+  if(joinBtn){
+    if(isOwner){
+      joinBtn.textContent="👥 Share invite link";
+      joinBtn.style.background="var(--blue)";
+      joinBtn.onclick=function(){shareCollabLink(currentCollabToken);};
+    } else if(hasJoined){
+      joinBtn.textContent="✓ Joined — Add places from Collections";
+      joinBtn.style.background="#10B981";
+      joinBtn.onclick=function(){closeCollabPage();};
+    } else {
+      joinBtn.textContent="⭐ Join this collection";
+      joinBtn.style.background="#10B981";
+      joinBtn.onclick=joinCollabCollection;
+    }
+  }
+  document.getElementById("collabPage").classList.add("open");
+  if(googleMapsReady)initCollabMap(cp);
+}
+
+async function joinCollabCollection(){
+  if(!authToken){
+    window._pendingCollabToken=currentCollabToken;
+    closeCollabPage();
+    showAuthScreen();
+    return;
+  }
+  var data=collabData;if(!data)return;
+  var col=data.collection;
+  // Check already joined
+  if(collections.some(function(c){return c.collabToken===currentCollabToken;})){
+    showToast("collab","ts","Already joined!","Find it in your Collections tab");
+    closeCollabPage();return;
+  }
+  // Add as a collaborative collection locally
+  var colId="collab_"+currentCollabToken;
+  var newCol=Object.assign({},col,{
+    id:colId,
+    collabToken:currentCollabToken,
+    isCollab:true,
+    ownerId:data.ownerId,
+    placeIds:[],
+    sections:[],sectionMap:{},
+    createdAt:new Date().toISOString()
+  });
+  collections.push(newCol);
+  try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+  fetch(BACKEND+"/sync",{method:"POST",headers:authHeaders(),body:JSON.stringify({places,collections})}).catch(function(){});
+  closeCollabPage();
+  // Navigate to collections
+  document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active");});
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
+  document.querySelector('[data-page="collectionsPage"]').classList.add("active");
+  document.getElementById("collectionsPage").classList.add("active");
+  renderCollections();
+  showToast("collab","ts","Joined! "+col.name,"Find it in your Collections tab");
+}
+
+function initCollabMap(pts){
+  var collabMap=new google.maps.Map(document.getElementById("collabMap"),{zoom:2,center:{lat:20,lng:10},gestureHandling:"cooperative",streetViewControl:false,mapTypeControl:false,fullscreenControl:false,zoomControl:false});
+  var bounds=new google.maps.LatLngBounds();
+  pts.filter(function(p){return p.lat&&p.lng;}).forEach(function(p){
+    var color=getCatColor(p.type);
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="22" height="28"><circle cx="11" cy="11" r="9" fill="'+color+'" stroke="white" stroke-width="2"/><circle cx="11" cy="11" r="3.5" fill="white" opacity="0.9"/><line x1="11" y1="20" x2="11" y2="28" stroke="'+color+'" stroke-width="2" stroke-linecap="round"/></svg>';
+    var icon={url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(22,28),anchor:new google.maps.Point(11,28)};
+    new google.maps.Marker({position:{lat:p.lat,lng:p.lng},map:collabMap,icon:icon,title:p.name});
+    bounds.extend({lat:p.lat,lng:p.lng});
+  });
+  if(!bounds.isEmpty())collabMap.fitBounds(bounds,{top:20,right:20,bottom:20,left:20});
+}
+
+function closeCollabPage(){
+  document.getElementById("collabPage").classList.remove("open");
+  currentCollabToken=null;collabData=null;
+}
+
+var collabPickerSelected={};
+
+function openCollabAddPicker(){
+  var token=currentCollabToken;
+  if(!token&&currentColId){
+    var col=collections.find(function(c){return c.id===currentColId;});
+    if(col&&col.collabToken)token=col.collabToken;
+  }
+  if(!token){showToast("collab","te","Not a collab collection","");return;}
+  currentCollabToken=token;
+  if(!authToken){window._pendingCollabToken=token;showAuthScreen();return;}
+  if(places.length===0){showToast("collab","te","No saved places","Add places to Hoplist first");return;}
+  var ex=document.getElementById("collabAddModal");if(ex)ex.remove();
+  collabPickerSelected={};
+  var alreadyNames=(collabData&&collabData.collabPlaces||[]).map(function(p){return p.name;});
+  var items=places.map(function(p){
+    var already=alreadyNames.includes(p.name);
+    return'<div class="col-picker-item'+(already?" in-col":"")+'" id="cpick-'+p.id+'" onclick="'+(already?"":"toggleCollabPick('"+p.id+"')")+'" style="'+(already?"opacity:0.5;cursor:default":"")+'">' +
+      '<div class="col-picker-emoji">'+emo(p.type)+'</div>'+
+      '<div class="col-picker-name">'+p.name+'</div>'+
+      '<div class="col-picker-count">'+(p.city||"")+'</div>'+
+      '<div class="col-picker-check" id="cpick-check-'+p.id+'">'+(already?"✓":"")+'</div>'+
+      '</div>';
+  }).join('');
+  var html='<div class="modal-overlay" id="collabAddModal" onclick="this.id===\'collabAddModal\'&&this.remove()">'+
+    '<div class="bsheet"><div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad"><div class="bsheet-title">Add your places</div>'+
+    '<div style="font-size:13px;color:var(--gray-500);margin-bottom:12px">Select places then tap Done</div>'+
+    '<div class="col-picker-list">'+items+'</div>'+
+    '<div class="modal-btns">'+
+    '<button class="mbtn secondary" onclick="document.getElementById(\'collabAddModal\').remove()">Cancel</button>'+
+    '<button class="mbtn primary" onclick="submitCollabPick()">Done</button>'+
+    '</div></div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("collabAddModal",function(){document.getElementById("collabAddModal")?.remove();});
+}
+
+function toggleCollabPick(placeId){
+  collabPickerSelected[placeId]=!collabPickerSelected[placeId];
+  var item=document.getElementById("cpick-"+placeId);
+  var check=document.getElementById("cpick-check-"+placeId);
+  if(item)item.classList.toggle("in-col",!!collabPickerSelected[placeId]);
+  if(check)check.textContent=collabPickerSelected[placeId]?"✓":"";
+}
+
+async function submitCollabPick(){
+  var ids=Object.keys(collabPickerSelected).filter(function(id){return collabPickerSelected[id];});
+  if(!ids.length){document.getElementById("collabAddModal")?.remove();return;}
+  document.getElementById("collabAddModal")?.remove();
+  showToast("collab","tl","Adding "+ids.length+" place"+(ids.length!==1?"s":"")+"…","");
+  try{
+    for(var i=0;i<ids.length;i++){
+      var place=places.find(function(p){return p.id===ids[i];});
+      if(!place)continue;
+      await fetch(BACKEND+"/collab/"+currentCollabToken+"/places",{method:"POST",headers:authHeaders(),body:JSON.stringify({place:{name:place.name,type:place.type,lat:place.lat,lng:place.lng,city:place.city,country:place.country,photoUrl:place.photoUrl,rating:place.rating}})});
+    }
+    hideToast("collab");
+    showToast("collab","ts","Added "+ids.length+" place"+(ids.length!==1?"s":"")+"!","");
+    await refreshCollabDetail();
+  }catch(e){hideToast("collab");showToast("collab","te","Failed",e.message);}
+}
+
+async function addPlaceToCollab(placeId){toggleCollabPick(placeId);}
+
+async function removeCollabPlace(placeId){
+  try{
+    await fetch(BACKEND+"/collab/"+currentCollabToken+"/places/"+placeId,{method:"DELETE",headers:authHeaders()});
+    await refreshCollabDetail();
+  }catch(e){showToast("collab","te","Failed","");}
+}
+
+function shareCollectionById(colId){currentColId=colId;shareCollection();}
+
+function buildShareUrl(col){
+  var ps=getColPlaces(col);
+  var data={n:col.name,e:col.emoji,p:ps.map(function(p){return{n:p.name,t:p.type||"default",la:Math.round((p.lat||0)*10000)/10000,lo:Math.round((p.lng||0)*10000)/10000,ci:p.city||"",co:p.country||"",ph:p.photoUrl||"",r:p.rating||null};})};
+  return window.location.origin+"/?share="+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+
+function buildGoogleMapsUrl(col){
+  var ps=getColPlaces(col).filter(function(p){return p.lat&&p.lng;});
+  if(ps.length===0)return null;
+  if(ps.length===1)return"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(ps[0].name+", "+ps[0].city);
+  return"https://www.google.com/maps/dir/"+ps.map(function(p){return p.lat+","+p.lng;}).join("/");
+}
+
+function shareCollection(){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var ps=getColPlaces(col);
+  if(ps.length===0){showToast("share","te","No places to share","Add some places first");return;}
+
+  var shareUrl=buildShareUrl(col);
+  var ex=document.getElementById("shareModal");if(ex)ex.remove();
+
+  var preview=ps.slice(0,3).map(function(p){
+    return'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gray-100)">'+
+      (p.photoUrl?'<div style="width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0"><img src="'+p.photoUrl+'" style="width:100%;height:100%;object-fit:cover"/></div>':'<div style="font-size:20px">'+emo(p.type)+'</div>')+
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>'+
+      '<div style="font-size:11.5px;color:var(--gray-400)">'+(p.city||"")+(p.country?", "+p.country:"")+'</div></div></div>';
+  }).join("")+(ps.length>3?'<div style="font-size:12px;color:var(--gray-400);padding-top:6px;text-align:center">+ '+(ps.length-3)+' more places</div>':"");
+
+  var html='<div class="modal-overlay" id="shareModal" onclick="closeShareModal(event)">'+
+    '<div class="bsheet">'+
+    '<div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad">'+
+    '<div class="bsheet-title">'+col.emoji+' '+col.name+'</div>'+
+    '<div style="background:var(--gray-50);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:16px">'+preview+'</div>'+
+    '<div style="display:flex;flex-direction:column;gap:10px;">'+
+    '<button class="mbtn primary" style="font-size:15px;padding:15px" onclick="copyShareLink()">📍 Share with pins map</button>'+
+    '<div style="font-size:12px;color:var(--gray-400);text-align:center;margin-top:-4px">Opens a map with all your pins — no app needed</div>'+
+    '<button class="mbtn secondary" onclick="openGoogleMaps()">🗺️ Open as Google Maps route</button>'+
+    (authToken?'<div style="display:flex;gap:8px;margin-top:4px"><input class="modal-input" id="inviteEmail" placeholder="Invite a friend by email…" style="margin:0;flex:1"/><button class="mbtn primary" style="flex:0 0 auto;padding:12px 16px;white-space:nowrap" onclick="sendInvite()">Send</button></div>':"")+
+    '</div>'+
+    '<button class="mbtn secondary" style="width:100%;margin-top:12px" onclick="document.getElementById(\'shareModal\').remove()">Cancel</button>'+
+    '</div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("shareModal",function(){document.getElementById("shareModal")?.remove();});
+}
+
+async function copyShareLink(){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var ps=getColPlaces(col);
+  var data={n:col.name,e:col.emoji,p:ps.map(function(p){return{n:p.name,t:p.type||"default",la:Math.round((p.lat||0)*10000)/10000,lo:Math.round((p.lng||0)*10000)/10000,ci:p.city||"",co:p.country||"",ph:p.photoUrl||"",r:p.rating||null};})};
+  document.getElementById("shareModal")?.remove();
+  showToast("share","tl","Creating link…","");
+  try {
+    var res=await fetch(BACKEND+"/share",{method:"POST",headers:authHeaders(),body:JSON.stringify({data})});
+    var result=await res.json();
+    if(!result.success)throw new Error("Failed");
+    var url=result.url;
+    hideToast("share");
+    if(navigator.share){
+      navigator.share({title:col.emoji+" "+col.name,url:url}).catch(function(){});
+    } else {
+      navigator.clipboard.writeText(url).then(function(){
+        showToast("share","ts","Link copied!","Short link — works every time");
+      }).catch(function(){
+        var ta=document.createElement("textarea");ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);
+        showToast("share","ts","Link copied!","");
+      });
+    }
+  } catch(e) {
+    hideToast("share");
+    showToast("share","te","Failed","Check your connection");
+  }
+}
+
+function openGoogleMaps(){
+  var col=collections.find(function(c){return c.id===currentColId;});if(!col)return;
+  var url=buildGoogleMapsUrl(col);if(!url)return;
+  document.getElementById("shareModal")?.remove();
+  window.open(url,"_blank");
+}
+
+function closeShareModal(e){if(e.target.id==="shareModal")document.getElementById("shareModal").remove();}
+
+async function sendInvite(){
+  var email=document.getElementById("inviteEmail")?.value.trim();
+  if(!email){showToast("inv","te","Enter an email","");return;}
+  if(!authToken){showToast("inv","te","Sign in required","");return;}
+  try{
+    var res=await fetch(BACKEND+"/collections/"+currentColId+"/invite",{method:"POST",headers:authHeaders(),body:JSON.stringify({email})});
+    var data=await res.json();
+    if(!res.ok){showToast("inv","te","Failed",data.error||"");return;}
+    document.getElementById("shareModal")?.remove();
+    showToast("inv","ts","Invite sent!",email+" will get a link");
+  }catch(e){showToast("inv","te","Failed","Check your connection");}
+}
+
+// ── SHARE FLOW ─────────────────────────────────────────────────────────────
+// Two things need to happen before we can render: data loaded + Google Maps ready
+// We wait for both independently and render when both are ready.
+var shareData=null;
+var shareMapsReady=false;
+
+function tryRenderShare(){
+  if(shareData&&shareMapsReady){
+    renderSharePage(shareData);
+    shareData=null; // prevent double render
+  }
+}
+
+// Check share param IMMEDIATELY on script load
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  // Check for invite links too (requires login but still suppress auth initially)
+  var invite=params.get("invite");
+  if(invite){window.history.replaceState({},"","/");setTimeout(function(){handleInvite(invite);},500);return;}
+
+  var collabToken=params.get("collab");
+  if(collabToken){
+    window._pendingCollabToken=collabToken;
+    window._isShareMode=true; // suppress auth screen — will check auth after load
+    window.history.replaceState({},"","/");
+    return;
+  }
+
+  var shortToken=params.get("s");
+  var longShare=params.get("share");
+  if(!shortToken&&!longShare)return;
+
+  window._isShareMode=true;
+  document.getElementById("authScreen").style.display="none";
+  window.history.replaceState({},"","/");
+
+  if(longShare){
+    try{shareData=JSON.parse(decodeURIComponent(escape(atob(longShare))));}catch(e){}
+    tryRenderShare();
+  } else if(shortToken){
+    // Fetch short link data from server
+    fetch("https://roamy-backend.onrender.com/share/"+shortToken)
+      .then(function(r){return r.json();})
+      .then(function(result){
+        if(result&&result.data){shareData=result.data;tryRenderShare();}
+      })
+      .catch(function(e){console.log("Share fetch error",e);});
+  }
+})();
+
+function onGoogleMapsReady(){
+  googleMapsReady=true;
+  shareMapsReady=true;
+  tryRenderShare();
+  // Handle pending collab link
+  if(window._pendingCollabToken){
+    var ct=window._pendingCollabToken;window._pendingCollabToken=null;
+    if(authToken){openCollabPage(ct);}else{showAuthScreen();}
+    return;
+  }
+  if(!window._isShareMode){
+    if(pendingMapInit){initMap();}
+    var params=new URLSearchParams(window.location.search);
+    var sharedInput=params.get("url")||params.get("text")||params.get("title");
+    if(sharedInput&&sharedInput.trim()){
+      window.history.replaceState({},"","/");
+      setTimeout(function(){document.getElementById("addInput").value=sharedInput.trim();doAdd();},800);
+    }
+  }
+}
+
+var currentShareData=null;
+
+function renderSharePage(data){
+  if(!data||!data.p||!data.p.length)return;
+  currentShareData=data;
+  var sp=document.getElementById("sharePage");
+  // Hero
+  var cover=data.p.find(function(p){return p.ph;});
+  var bg=document.getElementById("shareHeroBg");
+  if(cover){bg.style.backgroundImage="url("+cover.ph+")";}
+  else{bg.style.background=data.c||"#2563EB";}
+  document.getElementById("shareEmoji").textContent=data.e||"🗺️";
+  document.getElementById("shareName").textContent=data.n||"Travel Collection";
+  var countries={};data.p.forEach(function(p){if(p.co)countries[p.co]=1;});
+  document.getElementById("shareMeta").textContent=data.p.length+" places · "+Object.keys(countries).length+" countries";
+  // Places list
+  document.getElementById("sharePlaces").innerHTML=data.p.map(function(p){
+    var thumb=p.ph?'<div class="share-place-thumb"><img src="'+p.ph+'" onerror="this.parentElement.innerHTML=\'<div class=share-place-thumb-emo>'+emo(p.t)+'</div>\'"/></div>':'<div class="share-place-thumb"><div class="share-place-thumb-emo">'+emo(p.t)+'</div></div>';
+    return'<div class="share-place-card">'+thumb+'<div class="share-place-info"><div class="share-place-name">'+p.n+'</div><div class="share-place-sub">'+[p.ci,p.co].filter(Boolean).join(", ")+'</div></div></div>';
+  }).join('');
+  // Google Maps URL
+  var mapsUrl;
+  if(data.p.length===1){
+    mapsUrl="https://www.google.com/maps/search/?api=1&query="+data.p[0].la+","+data.p[0].lo;
+  } else {
+    mapsUrl="https://www.google.com/maps/dir/"+data.p.filter(function(p){return p.la&&p.lo;}).map(function(p){return p.la+","+p.lo;}).join("/");
+  }
+  document.getElementById("shareGmapsBtn").href=mapsUrl;
+  // Show save or login button
+  var saveBtn=document.getElementById("shareSaveBtn");
+  var loginBtn=document.getElementById("shareLoginBtn");
+  if(saveBtn)saveBtn.style.display=authToken?"flex":"none";
+  if(loginBtn)loginBtn.style.display=authToken?"none":"flex";
+  sp.classList.add("open");
+  if(googleMapsReady){initShareMap(data.p);}
+}
+
+function closeSharePage(){
+  document.getElementById("sharePage").classList.remove("open");
+  if(!authToken){showAuthScreen();}
+}
+
+function shareLoginToSave(){
+  window._pendingSaveShare=currentShareData;
+  document.getElementById("sharePage").classList.remove("open");
+  showAuthScreen();
+}
+
+function saveSharedCollection(){
+  if(!currentShareData||!authToken)return;
+  var data=currentShareData;
+  var colId="col"+Date.now();
+  var newCol={id:colId,name:data.n,emoji:data.e||"🗺️",color:"#2563EB",placeIds:[],sections:[],sectionMap:{},createdAt:new Date().toISOString(),aiCover:null};
+  var newPlaces=data.p.map(function(p){
+    var id="sp"+Date.now()+Math.random().toString(36).slice(2,6);
+    newCol.placeIds.push(id);
+    return{id:id,name:p.n,type:p.t||"default",lat:p.la,lng:p.lo,city:p.ci,country:p.co,photoUrl:p.ph||null,rating:p.r||null,visited:false,addedAt:new Date().toISOString()};
+  });
+  newPlaces.forEach(function(p){places.unshift(p);});
+  collections.push(newCol);
+  try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+  fetch(BACKEND+"/sync",{method:"POST",headers:authHeaders(),body:JSON.stringify({places,collections})}).catch(function(){});
+  document.getElementById("sharePage").classList.remove("open");
+  document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active");});
+  document.querySelectorAll(".page").forEach(function(pg){pg.classList.remove("active");});
+  document.querySelector('[data-page="collectionsPage"]').classList.add("active");
+  document.getElementById("collectionsPage").classList.add("active");
+  renderCollections();renderList();
+  showToast("save","ts",'"'+data.n+'" saved!',newPlaces.length+" places added to your collections");
+  setTimeout(function(){openColDetail(colId);},600);
+  setTimeout(function(){generateCoverForCol(colId);},1000);
+}
+
+function initShareMap(pts){
+  var shareMap=new google.maps.Map(document.getElementById("shareMap"),{
+    zoom:2,center:{lat:20,lng:10},
+    gestureHandling:"cooperative",
+    streetViewControl:false,mapTypeControl:false,fullscreenControl:false,zoomControl:false
+  });
+  var bounds=new google.maps.LatLngBounds();
+  pts.filter(function(p){return p.la&&p.lo;}).forEach(function(p){
+    var color=getCatColor(p.t);
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="22" height="28"><circle cx="11" cy="11" r="9" fill="'+color+'" stroke="white" stroke-width="2"/><circle cx="11" cy="11" r="3.5" fill="white" opacity="0.9"/><line x1="11" y1="20" x2="11" y2="28" stroke="'+color+'" stroke-width="2" stroke-linecap="round"/></svg>';
+    var icon={url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(22,28),anchor:new google.maps.Point(11,28)};
+    new google.maps.Marker({position:{lat:p.la,lng:p.lo},map:shareMap,icon:icon,title:p.n});
+    bounds.extend({lat:p.la,lng:p.lo});
+  });
+  if(!bounds.isEmpty())shareMap.fitBounds(bounds,{top:20,right:20,bottom:20,left:20});
+}
+
+// ── LIST ───────────────────────────────────────────────────────────────────
+function getFiltered(){
+  var f=places.filter(function(p){return tab==="visited"?p.visited:tab==="wishlist"?!p.visited:true;});
+  if(search.trim()){var q=search.toLowerCase();f=f.filter(function(p){return(p.name||"").toLowerCase().includes(q)||(p.city||"").toLowerCase().includes(q)||(p.country||"").toLowerCase().includes(q);});}
+  return f;
+}
+function getGrouped(f){return f.reduce(function(acc,p){var c=p.country||"Unknown";var ci=p.city||"Other";if(!acc[c])acc[c]={};if(!acc[c][ci])acc[c][ci]=[];acc[c][ci].push(p);return acc;},{});}
+
+function renderStats(){
+  var total=places.length;var vis=places.filter(function(p){return p.visited;}).length;
+  var countries=Object.keys(places.reduce(function(a,p){a[p.country||"?"]=1;return a;},{})).length;
+  document.getElementById("hsSaved").textContent=total;document.getElementById("hsVisited").textContent=vis;document.getElementById("hsCountries").textContent=countries;
+}
+
+// ── MULTI SELECT ────────────────────────────────────────────────────────────
+var selectMode=false;
+var selectedIds={};
+
+function enterSelectMode(id){
+  selectMode=true;selectedIds={};selectedIds[id]=true;
+  document.getElementById("selectBar").classList.add("show");
+  updateSelectBar();renderList();
+}
+function exitSelectMode(){
+  selectMode=false;selectedIds={};
+  document.getElementById("selectBar").classList.remove("show");
+  renderList();
+}
+function toggleSelectId(id){
+  if(selectedIds[id])delete selectedIds[id];else selectedIds[id]=true;
+  updateSelectBar();
+  var card=document.getElementById("card-"+id);
+  if(card){
+    card.classList.toggle("selected",!!selectedIds[id]);
+    var circle=card.querySelector(".pselect-circle");
+    if(circle)circle.textContent=selectedIds[id]?"✓":"";
+  }
+}
+function updateSelectBar(){
+  var n=Object.keys(selectedIds).length;
+  document.getElementById("selectCount").textContent=n+" place"+(n!==1?"s":"")+" selected";
+}
+function collectSelected(){
+  var ids=Object.keys(selectedIds);if(!ids.length)return;
+  openAddToColMulti(ids);
+}
+
+function openAddToColMulti(placeIds){
+  var ex=document.getElementById("addToColModal");if(ex)ex.remove();
+  if(collections.length===0){showToast("col","te","No collections","Create a collection first");return;}
+  colPickerPlaceId=null;
+  colPickerState={};
+  collections.forEach(function(col){colPickerState[col.id]=placeIds.every(function(id){return(col.placeIds||[]).includes(id);});});
+  var items=collections.map(function(col){
+    var sel=colPickerState[col.id];
+    return'<div class="col-picker-item'+(sel?" in-col":"")+'" onclick="colPickerToggleMulti(\''+col.id+'\')">'+
+      '<div class="col-picker-emoji" style="background:'+col.color+'20">'+col.emoji+'</div>'+
+      '<div class="col-picker-name">'+col.name+'</div>'+
+      '<div class="col-picker-count">'+(col.placeIds||[]).length+' places</div>'+
+      '<div class="col-picker-check">'+(sel?"✓":"")+'</div></div>';
+  }).join('');
+  var safeIds=JSON.stringify(placeIds).replace(/"/g,"'");
+  var html='<div class="modal-overlay" id="addToColModal" onclick="closeAddToCol(event)">'+
+    '<div class="bsheet"><div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
+    '<div class="bsheet-pad"><div class="bsheet-title">Add '+placeIds.length+' place'+(placeIds.length!==1?"s":"")+'…</div>'+
+    '<div style="font-size:13px;color:var(--gray-500);margin-bottom:12px">Select collections then press Done</div>'+
+    '<div class="col-picker-list">'+items+'</div>'+
+    '<div class="modal-btns"><button class="mbtn secondary" onclick="document.getElementById(\'addToColModal\').remove()">Cancel</button>'+
+    '<button class="mbtn primary" onclick="saveColPickerMulti('+safeIds+')">Done</button>'+
+    '</div></div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("addToColModal",function(){document.getElementById("addToColModal")?.remove();});
+}
+function colPickerToggleMulti(colId){
+  colPickerState[colId]=!colPickerState[colId];
+  var items=document.querySelectorAll("#addToColModal .col-picker-item");
+  var idx=collections.findIndex(function(c){return c.id===colId;});
+  if(idx>=0&&items[idx]){items[idx].classList.toggle("in-col",colPickerState[colId]);var ch=items[idx].querySelector(".col-picker-check");if(ch)ch.textContent=colPickerState[colId]?"✓":"";}
+}
+function saveColPickerMulti(placeIds){
+  if(!placeIds||!placeIds.length){document.getElementById("addToColModal")?.remove();return;}
+  var added=[];
+  collections=collections.map(function(col){
+    if(!colPickerState[col.id])return col;
+    added.push(col.id);
+    return Object.assign({},col,{placeIds:[...new Set([...(col.placeIds||[]),...placeIds])]});
+  });
+  document.getElementById("addToColModal")?.remove();
+  try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+  if(authToken){clearTimeout(syncTimeout);pushToServer();}
+  renderList();renderCollections();
+  showToast("col","ts","Added to "+added.length+" collection"+(added.length!==1?"s":"")+"!",placeIds.length+" places");
+  exitSelectMode();
+  added.forEach(function(colId){setTimeout(function(){generateCoverForCol(colId);},500);});
+}
+
+function renderList(){
+  renderStats();
+  var list=document.getElementById("placeList");
+  var f=getFiltered();var g=getGrouped(f);
+  if(f.length===0){
+    var ex=(tab==="all"&&!search)?'<div class="empty-examples">'+EXAMPLES.map(function(e){return'<button class="ex-btn" onclick="quickAdd(\''+e.v+'\')">'+e.l+'</button>';}).join("")+"</div>":"";
+    list.innerHTML='<div class="empty"><div class="empty-icon">🌍</div><div class="empty-title">'+(search?"No results":tab==="all"?"Start exploring":"No "+tab+" places")+'</div><div class="empty-sub">'+(search?"Try a different search":tab==="all"?"Paste any link or type a destination":"Mark places as "+tab)+'</div>'+ex+'</div>';
+    return;
+  }
+  list.innerHTML=Object.entries(g).map(function(entry){
+    var country=entry[0];var cities=entry[1];
+    var cnt=Object.values(cities).flat().length;var open=!collapsed[country];
+    return'<div class="country-group"><div class="country-hdr" onclick="toggleCol2(\''+country+'\')"><div class="c-left"><span class="c-flag">'+flag(country)+'</span><span class="c-name">'+country+'</span><span class="c-count">'+cnt+'</span></div><span class="c-chev'+(open?" open":"")+'" >▾</span></div>'+
+    (open?Object.entries(cities).map(function(ce){
+      var city=ce[0];var ps=ce[1];
+      return'<div class="city-sec"><div class="city-lbl">'+city+'</div>'+
+        ps.map(function(p){
+          var thumb=p.photoUrl?'<div class="pthumb"><img src="'+p.photoUrl+'" onerror="this.parentElement.innerHTML=\'<div class=pthumb-emo>'+emo(p.type)+'</div>\'" loading="lazy"/></div>':'<div class="pthumb"><div class="pthumb-emo">'+emo(p.type)+'</div></div>';
+          var rating=p.rating?'<span class="prating">★ '+p.rating.toFixed(1)+'</span>':"";
+          var vtag=p.visited?'<span class="pvis-tag">Visited</span>':"";
+          var notePrev=p.notes?'<div style="font-size:11.5px;color:var(--amber);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📝 '+p.notes+'</div>':"";
+          // Which collections has this place
+          var colCount=collections.filter(function(c){return(c.placeIds||[]).includes(p.id);}).length;
+          var colTag=colCount?'<span style="font-size:10px;color:#7C3AED;background:#EDE9FE;padding:2px 7px;border-radius:20px;font-weight:600">🗂 '+colCount+'</span>':"";
+          return'<div class="pcard'+(selectMode&&selectedIds[p.id]?" selected":"")+'" id="card-'+p.id+'">'+
+            '<div class="pcard-main" '+
+            'onclick="selectMode?toggleSelectId(\''+p.id+'\'):openSheet(\''+p.id+'\')" '+
+            'oncontextmenu="event.preventDefault();enterSelectMode(\''+p.id+'\')" '+
+            'ontouchstart="startLongPress(\''+p.id+'\',event)" '+
+            'ontouchend="clearLongPress()" '+
+            'ontouchmove="clearLongPress()">'+
+            (selectMode?'<div class="pselect-circle">'+(selectedIds[p.id]?"✓":"")+'</div>':"")+
+            thumb+
+            '<div class="pinfo"><div class="pname">'+p.name+'</div><div class="pmeta"><span class="ptype-tag">'+emo(p.type)+' '+(p.type||'place')+'</span>'+rating+vtag+colTag+'</div>'+notePrev+'</div>'+
+            '<span class="pchev">›</span></div>'+
+            '<div class="pcard-actions">'+
+            '<button class="pact vis'+(p.visited?" on":"")+'" onclick="toggleVis(\''+p.id+'\',event)">'+(p.visited?"✓ Visited":"☐ Unvisited")+'</button>'+
+            '<button class="pact map" onclick="goToMap(\''+p.id+'\')">🗺 Map</button>'+
+            '<button class="pact col" onclick="openAddToCol(\''+p.id+'\')">🗂 Collect</button>'+
+            '<button class="pact del" onclick="askDelete(\''+p.id+'\')">🗑 Remove</button>'+
+            '</div>'+
+            '<div class="pcard-confirm" id="confirm-'+p.id+'"><span class="confirm-text">Remove this place?</span><div class="confirm-btns"><button class="cbtn no" onclick="cancelDelete(\''+p.id+'\')">Cancel</button><button class="cbtn yes" onclick="confirmDelete(\''+p.id+'\')">Yes, Remove</button></div></div>'+
+            '</div>';
+        }).join("")+'</div>';
+    }).join(""):"")+'</div>';
+  }).join("");
+}
+
+function startLongPress(id,e){
+  clearLongPress();
+  longPressTimer=setTimeout(function(){
+    longPressTimer=null;
+    navigator.vibrate&&navigator.vibrate(30);
+    enterSelectMode(id);
+  },450);
+}
+function clearLongPress(){
+  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
+}
+var longPressTimer=null;
+
+function toggleCol2(c){collapsed[c]=!collapsed[c];renderList();}
+function toggleVis(id,e){if(e)e.stopPropagation();places=places.map(function(p){return p.id===id?Object.assign({},p,{visited:!p.visited}):p;});save();renderList();if(mapInited)renderMapMarkers();}
+function askDelete(id){document.querySelectorAll(".pcard-confirm.show").forEach(function(el){el.classList.remove("show");});var el=document.getElementById("confirm-"+id);if(el)el.classList.add("show");}
+function cancelDelete(id){var el=document.getElementById("confirm-"+id);if(el)el.classList.remove("show");}
+function confirmDelete(id){
+  places=places.filter(function(p){return p.id!==id;});
+  collections=collections.map(function(c){return Object.assign({},c,{placeIds:(c.placeIds||[]).filter(function(pid){return pid!==id;})});});
+  if(mapInited&&markers[id]){markers[id].map=null;delete markers[id];}
+  try{localStorage.setItem("hoplist_v8",JSON.stringify({places,collections}));}catch(e){}
+  renderList();if(mapInited)renderMapStats();
+  // Delete from server
+  if(authToken){
+    fetch(BACKEND+"/places/"+id,{method:"DELETE",headers:authHeaders()}).catch(function(){});
+  }
+}
+function goToMap(id){
+  var p=places.find(function(x){return x.id===id;});if(!p)return;
+  document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active");});
+  document.querySelectorAll(".page").forEach(function(pg){pg.classList.remove("active");});
+  document.querySelector('[data-page="mapPage"]').classList.add("active");
+  document.getElementById("mapPage").classList.add("active");
+  if(!googleMapsReady){pendingMapInit=true;return;}
+  if(!mapInited)initMap();else{google.maps.event.trigger(map,"resize");}
+  renderMapMarkers();
+  if(p.lat&&p.lng)setTimeout(function(){map.panTo({lat:p.lat,lng:p.lng});map.setZoom(15);},300);
+}
+function quickAdd(val){document.getElementById("addInput").value=val;doAdd();}
+
+// TABS & SEARCH
+document.querySelectorAll(".htab").forEach(function(t){t.addEventListener("click",function(){document.querySelectorAll(".htab").forEach(function(x){x.classList.remove("active");});t.classList.add("active");tab=t.dataset.tab;renderList();});});
+document.getElementById("searchInput").addEventListener("input",function(e){search=e.target.value;renderList();});
+
+// ── SHEET ──────────────────────────────────────────────────────────────────
+
+function buildCatEditor(id,currentType){
+  var grid=ALL_CATS.map(function(c){var color=getCatColor(c.k);var sel=c.k===currentType?' selected" style="background:'+color:'"';return'<button class="cat-opt'+sel+'" onclick="selectCat(\''+id+'\',\''+c.k+'\')">'+c.l+'</button>';}).join('');
+  return'<div class="cat-editor"><div class="cat-editor-label">🏷 Change Category</div><div class="cat-grid">'+grid+'</div><div class="cat-custom-row"><input class="cat-custom-input" id="catCustom-'+id+'" placeholder="Custom category…"/><button class="cat-save-btn" onclick="saveCustomCat(\''+id+'\')">Add</button></div></div>';
+}
+function toggleCatEditor(id){var el=document.getElementById('catEditor-'+id);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function selectCat(id,cat){places=places.map(function(p){return p.id===id?Object.assign({},p,{type:cat}):p;});save();closeSheet();openSheet(id);if(mapInited)renderMapMarkers();}
+function saveCustomCat(id){var input=document.getElementById('catCustom-'+id);if(!input)return;var val=input.value.trim().toLowerCase();if(!val)return;selectCat(id,val);}
+
+function openSheet(id){
+  var p=places.find(function(x){return x.id===id;});if(!p)return;
+  var ex=document.getElementById("sheetOverlay");if(ex)ex.remove();
+  var photoHtml=p.photoUrl?'<img class="sheet-photo" src="'+p.photoUrl+'" onerror="this.outerHTML=\'<div class=sheet-photo-emo>'+emo(p.type)+'</div>\'"/>':"<div class=\"sheet-photo-emo\">"+emo(p.type)+"</div>";
+  var pills='<span class="spill type" onclick="toggleCatEditor(\''+p.id+'\')" title="Change category">'+emo(p.type)+' '+(p.type||'place')+' ✏️</span>';
+  if(p.rating)pills+='<span class="spill rat">★ '+p.rating.toFixed(1)+' <span style="font-weight:400;font-size:10.5px">('+((p.totalRatings||0).toLocaleString())+')</span></span>';
+  if(p.openNow!==null&&p.openNow!==undefined)pills+='<span class="spill '+(p.openNow?'open':'closed')+'">'+(p.openNow?'Open now':'Closed')+'</span>';
+  if(p.priceLevel)pills+='<span class="spill price">'+priceStr(p.priceLevel)+'</span>';
+  var mapsUrl="https://www.google.com/maps/search/"+encodeURIComponent([p.name,p.city,p.country].filter(Boolean).join(" "));
+  var websiteBtn=p.website?'<a class="sact sec" href="'+p.website+'" target="_blank">🌐 Website</a>':'';
+  var colsForPlace=collections.filter(function(c){return(c.placeIds||[]).includes(p.id);});
+  var colTag=colsForPlace.length?'<div style="margin-bottom:12px;font-size:12.5px;color:#7C3AED;">🗂 In: '+colsForPlace.map(function(c){return c.emoji+' '+c.name;}).join(', ')+'</div>':'';
+  var html='<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheetOutside(event)"><div class="sheet">'+
+    '<div id="sheetHandleZone" style="padding:8px 0 4px;touch-action:none;cursor:grab;display:flex;justify-content:center;"><div class="sheet-handle"></div></div>'+photoHtml+
+    '<div class="sheet-body">'+
+    '<div class="sheet-top"><div class="sheet-name">'+p.name+'</div><button class="sheet-x" onclick="closeSheet()">✕</button></div>'+
+    '<div class="sheet-pills">'+pills+'</div>'+
+    '<div id="catEditor-'+p.id+'" style="display:none;margin-bottom:14px;">'+buildCatEditor(p.id,p.type)+'</div>'+
+    colTag+
+    '<div class="sheet-addr"><span>📍</span><span>'+(p.address||[p.city,p.country].filter(Boolean).join(', '))+'</span></div>'+
+    (p.description?'<div class="sheet-desc">'+p.description+'</div>':'')+
+    '<div class="notes-section">'+
+    (p.notes
+      ?'<div class="notes-display-label">📝 Your note</div><div class="notes-display" onclick="editNote(\''+p.id+'\')">'+p.notes.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'<div style="margin-top:6px;font-size:11px;color:var(--gray-400)">Tap to edit</div></div>'
+      :'<div class="notes-label">📝 Add a note</div><textarea class="notes-textarea" id="noteInput-'+p.id+'" placeholder="Why you want to visit, who recommended it, best time to go…"></textarea><button class="notes-save-btn" onclick="saveNote(\''+p.id+'\')">Save Note</button>'
+    )+
+    '</div>'+
+    '<div class="sheet-hr"></div>'+
+    '<div class="sheet-acts">'+
+    '<a class="sact primary" href="'+mapsUrl+'" target="_blank">🗺️ Open in Google Maps</a>'+
+    '<div class="sact-row">'+
+    '<button class="sact '+(p.visited?'suc':'sec')+' half" onclick="toggleVisSheet(\''+p.id+'\')">'+(p.visited?'✓ Visited':'Mark Visited')+'</button>'+
+    '<button class="sact purple half" onclick="openAddToCol(\''+p.id+'\')">🗂️ Add to Collection</button>'+
+    '</div>'+
+    (websiteBtn?'<div class="sact-row">'+websiteBtn+'</div>':'')+
+    '<div class="sheet-confirm" id="sheetConfirm"><div class="sc-text">Remove this place?</div><div class="sc-btns"><button class="sc-btn no" onclick="document.getElementById(\'sheetConfirm\').classList.remove(\'show\')">Cancel</button><button class="sc-btn yes" onclick="delFromSheet(\''+p.id+'\')">Yes, Remove</button></div></div>'+
+    '<button class="sact dan" onclick="document.getElementById(\'sheetConfirm\').classList.add(\'show\')">🗑️ Remove place</button>'+
+    '</div></div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  enableSwipeDismiss("sheetOverlay",closeSheet);
+  pushBackState("sheet");
+  if(mapInited&&p.lat&&p.lng){map.panTo({lat:p.lat,lng:p.lng});map.setZoom(Math.max(map.getZoom(),14));}
+}
+
+function saveNote(id){var el=document.getElementById('noteInput-'+id);if(!el)return;var note=el.value.trim();places=places.map(function(p){return p.id===id?Object.assign({},p,{notes:note}):p;});save();closeSheet();openSheet(id);}
+function editNote(id){var p=places.find(function(x){return x.id===id;});if(!p)return;var section=document.querySelector('.notes-section');if(!section)return;section.innerHTML='<div class="notes-label">📝 Edit note</div><textarea class="notes-textarea" id="noteInput-'+id+'" style="min-height:100px">'+(p.notes||'')+'</textarea><button class="notes-save-btn" onclick="saveNote(\''+id+'\')">Save Note</button>';document.getElementById('noteInput-'+id).focus();}
+function closeSheet(){
+  var el=document.getElementById("sheetOverlay");
+  if(!el)return;
+  el.classList.add("closing");
+  setTimeout(function(){if(el.parentNode)el.remove();},300);
+}
+function closeSheetOutside(e){if(e.target.id==="sheetOverlay")closeSheet();}
+function toggleVisSheet(id){toggleVis(id,null);closeSheet();openSheet(id);}
+function delFromSheet(id){closeSheet();confirmDelete(id);}
+
+// ── MULTI PLACE PICKER ─────────────────────────────────────────────────────
+var pickerSelected={};var pickerPlaces=[];
+
+function openPicker(incomingPlaces){
+  var ex=document.getElementById("pickerOverlay");if(ex)ex.remove();
+  pickerSelected={};pickerPlaces=incomingPlaces;
+  pickerPlaces.forEach(function(p,i){pickerSelected[i]=true;});
+  var placesHtml=pickerPlaces.map(function(p,i){
+    var thumb=p.photoUrl?'<div class="picker-thumb"><img src="'+p.photoUrl+'" onerror="this.parentElement.innerHTML=\'<div class=picker-thumb-emo>'+emo(p.type)+'</div>\'"/></div>':'<div class="picker-thumb"><div class="picker-thumb-emo">'+emo(p.type)+'</div></div>';
+    var rating=p.rating?' · ★'+p.rating.toFixed(1):'';
+    return'<div class="picker-place selected" id="pp-'+i+'" onclick="togglePickerPlace('+i+')"><div class="picker-place-check">✓</div>'+thumb+'<div class="picker-info"><div class="picker-name">'+p.name+'</div><div class="picker-meta"><span class="picker-type">'+emo(p.type)+' '+(p.type||'place')+'</span><span>'+(p.city||'')+', '+(p.country||'')+rating+'</span></div></div></div>';
+  }).join('');
+  var single=pickerPlaces.length===1;
+  var html='<div class="picker-overlay" id="pickerOverlay"><div class="picker"><div class="picker-handle"></div><div class="picker-header"><div class="picker-title">'+(single?'Save this place?':pickerPlaces.length+' places found!')+'</div><div class="picker-sub">'+(single?'Confirm and optionally add a note.':'Select which places to save.')+'</div></div><div class="picker-places">'+placesHtml+'</div><div class="picker-notes-wrap"><div class="picker-notes-label">📝 Add a note (optional)</div><textarea class="picker-notes-input" id="pickerNotes" placeholder="Why you want to visit, who recommended it…"></textarea></div><div class="picker-footer"><button class="picker-save-btn" id="pickerSaveBtn" onclick="savePicked()">Save Selected</button><button class="picker-cancel-btn" onclick="closePicker()">Cancel</button></div></div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+  pushBackState("picker");
+  enableSwipeDismiss("pickerOverlay",closePicker);
+}
+
+function togglePickerPlace(i){pickerSelected[i]=!pickerSelected[i];var el=document.getElementById('pp-'+i);var check=el.querySelector('.picker-place-check');if(pickerSelected[i]){el.classList.add('selected');check.textContent='✓';}else{el.classList.remove('selected');check.textContent='';}var any=Object.values(pickerSelected).some(function(v){return v;});document.getElementById('pickerSaveBtn').disabled=!any;}
+function closePicker(){
+  var el=document.getElementById('pickerOverlay');
+  if(!el)return;
+  el.classList.add("closing");
+  setTimeout(function(){if(el.parentNode)el.remove();},300);
+}
+function savePicked(){
+  var noteEl=document.getElementById('pickerNotes');var note=noteEl?noteEl.value.trim():'';
+  var toSave=[];
+  pickerPlaces.forEach(function(p,i){if(!pickerSelected[i])return;toSave.push(Object.assign({id:Date.now().toString()+i+Math.random().toString(36).slice(2,6),visited:false,addedAt:new Date().toISOString(),notes:note},p));});
+  if(toSave.length===0)return;
+  toSave.forEach(function(p){places.unshift(p);});
+  closePicker();save();renderList();if(mapInited)renderMapMarkers();
+  showToast('add','ts',toSave.length+' place'+(toSave.length>1?'s':'')+' saved!',toSave.map(function(p){return p.name;}).join(', '));
+  if(toSave.length===1)setTimeout(function(){openSheet(toSave[0].id);},400);
+}
+
+// ── TOASTS ─────────────────────────────────────────────────────────────────
+var tTimers={};
+function showToast(id,type,title,sub){clearTimeout(tTimers[id]);var area=document.getElementById("toastArea");var ex=document.getElementById("t-"+id);if(ex)ex.remove();var icon=type==="tl"?'<div class="t-spin"></div>':type==="ts"?'<span class="t-ico">✅</span>':'<span class="t-ico">❌</span>';var prog=type==="tl"?'<div class="t-prog"><div class="t-bar"></div></div>':"";area.insertAdjacentHTML("beforeend",'<div class="toast '+type+'" id="t-'+id+'">'+icon+'<div><div class="t-title">'+title+'</div>'+(sub?'<div class="t-sub">'+sub+'</div>':'')+prog+'</div></div>');if(type!=="tl")tTimers[id]=setTimeout(function(){var el=document.getElementById("t-"+id);if(el)el.remove();},4000);}
+function hideToast(id){clearTimeout(tTimers[id]);var el=document.getElementById("t-"+id);if(el)el.remove();}
+
+// ── ADD ─────────────────────────────────────────────────────────────────────
+async function doAdd(){
+  var input=document.getElementById("addInput");var btn=document.getElementById("addBtn");
+  var trimmed=input.value.trim();if(!trimmed)return;
+  input.value="";input.disabled=true;btn.disabled=true;
+  btn.innerHTML='<div style="width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.75s linear infinite"></div>';
+  var isLink=/^https?:\/\//i.test(trimmed);
+  showToast("add","tl",isLink?"Scraping post…":"Finding places…","AI is identifying locations");
+  try{
+    var res=await fetch(BACKEND+"/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:trimmed})});
+    var data=await res.json();
+    if(!res.ok||!data.places||data.places.length===0)throw new Error(data.error||"No places found");
+    hideToast("add");openPicker(data.places);
+  }catch(e){
+    hideToast("add");showToast("add","te","Couldn't find a place",e.message&&e.message.length<80?e.message:"Try typing the place name directly");
+  }finally{input.disabled=false;btn.disabled=false;btn.innerHTML="+";input.focus();}
+}
+document.getElementById("addInput").addEventListener("keydown",function(e){if(e.key==="Enter")doAdd();});
+document.getElementById("addBtn").addEventListener("click",doAdd);
+
+// ── PWA ─────────────────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+
+// ── SPLASH DISMISS ─────────────────────────────────────────────────────────
+function hideSplash(){
+  var s=document.getElementById("splashScreen");
+  if(s){s.style.opacity="0";s.style.visibility="hidden";setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},600);}
+}
+// Hide splash after min 1.4s so branding registers, then once app is ready
+var _splashTimer=setTimeout(hideSplash,1800);
+function hideSplashEarly(){clearTimeout(_splashTimer);setTimeout(hideSplash,400);}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+try{load();renderList();renderCollections();initAuth().then(hideSplashEarly).catch(hideSplashEarly);}catch(e){console.error("Init error:",e);hideSplash();}
+</script>
+</body>
+</html>
