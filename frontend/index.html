@@ -475,19 +475,15 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
 
 <!-- SPLASH SCREEN -->
 <div id="splashScreen" style="position:fixed;inset:0;background:linear-gradient(160deg,#0D1259 0%,#1A2FB8 45%,#3B5BDB 100%);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity 0.55s ease,visibility 0.55s ease;">
-  <div style="position:relative;width:72px;height:88px;display:flex;align-items:flex-start;justify-content:center;">
-    <div style="width:72px;height:72px;background:linear-gradient(180deg,rgba(255,255,255,0.88) 0%,rgba(255,255,255,0.55) 100%);border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;display:flex;align-items:center;justify-content:center;font-size:26px;">✈</div>
-    <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:22px solid rgba(255,255,255,0.55);"></div>
-  </div>
-  <div style="font-family:'Poppins',sans-serif;font-size:40px;font-weight:800;color:white;letter-spacing:-0.5px;line-height:1;">Hoplist</div>
-  <div style="font-family:'Inter',sans-serif;font-size:14px;color:rgba(255,255,255,0.65);letter-spacing:0.04em;">Your travel wishlist</div>
+  <img src="icon.png" alt="Hoplist" style="width:180px;height:180px;border-radius:36px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
+  <div style="font-family:'Inter',sans-serif;font-size:14px;color:rgba(255,255,255,0.65);letter-spacing:0.04em;margin-top:4px;">Your travel wishlist</div>
 </div>
 
 <!-- HOME PAGE -->
 <div class="page active" id="homePage">
   <div class="home-header">
     <div class="home-top">
-      <div class="logo"><div class="logo-icon">✈</div><div class="logo-text">Hoplist</div></div>
+      <div class="logo"><img src="icon.png" alt="Hoplist" style="height:44px;width:auto;border-radius:8px;"></div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="hstats">
           <div><div class="hstat-num" id="hsSaved">0</div><div class="hstat-lbl">Saved</div></div>
@@ -588,8 +584,7 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
 <!-- AUTH SCREEN -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-logo">
-    <div class="auth-logo-icon">✈</div>
-    <div class="auth-logo-text">Hoplist</div>
+    <img src="icon.png" alt="Hoplist" style="width:130px;height:130px;border-radius:26px;box-shadow:0 8px 28px rgba(0,0,0,0.3);">
   </div>
   <div class="auth-tagline">Your travel wishlist, beautifully organized</div>
   <div class="auth-card">
