@@ -688,6 +688,8 @@ const EXAMPLES=[{l:"🍽️ Noma, Copenhagen",v:"Noma restaurant Copenhagen"},{l
 const ALL_CATS=[{k:"restaurant",l:"🍽 Restaurant"},{k:"cafe",l:"☕ Cafe"},{k:"bar",l:"🍸 Bar"},{k:"hotel",l:"🏨 Hotel"},{k:"museum",l:"🏛 Museum"},{k:"beach",l:"🏖 Beach"},{k:"park",l:"🌿 Park"},{k:"market",l:"🛍 Market"},{k:"shop",l:"🛒 Shop"},{k:"temple",l:"⛩ Temple"},{k:"church",l:"⛪ Church"},{k:"viewpoint",l:"🌄 Viewpoint"},{k:"attraction",l:"🎭 Attraction"},{k:"nature",l:"🏔 Nature"},{k:"neighborhood",l:"🏘 Neighborhood"},{k:"spa",l:"💆 Spa"},{k:"club",l:"🎵 Club"},{k:"island",l:"🏝 Island"},{k:"waterfall",l:"💦 Waterfall"},{k:"castle",l:"🏰 Castle"},{k:"gallery",l:"🖼 Gallery"},{k:"winery",l:"🍷 Winery"},{k:"brewery",l:"🍺 Brewery"},{k:"rooftop",l:"🌆 Rooftop"},{k:"lake",l:"🏞 Lake"},{k:"cave",l:"🕳 Cave"}];
 
 // ── State ──────────────────────────────────────────────────────────────────
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function safeUrl(u){return u&&/^https?:\/\//i.test(u)?u:"";}
 var places=[];var collections=[];
 var tab="all";var search="";var mapSearch="";var mapFilter="all";
 var collapsed={};var markers={};var map;var mapInited=false;
@@ -785,6 +787,7 @@ document.getElementById("authPassword").addEventListener("keydown",function(e){i
 
 function doLogout(){
   authToken=null;currentUser=null;
+  collabData=null;_collabAllPlaces=null;
   localStorage.removeItem("hoplist_token");
   localStorage.removeItem("hoplist_v8");
   places=[];collections=[];
@@ -1298,7 +1301,6 @@ function renderColDetailPlaces(col){
 }
 
 function switchTab(secId){activeSecId=secId;renderColDetailPlaces();}
-function toggleSection(){}
 
 // ── COLLECTION MAP ──────────────────────────────────────────────────────────
 function openCollectionMap(){
@@ -1420,7 +1422,7 @@ function renderColPlaceCard(p,secId,accentColor){
   var removeBtn=p.addedByName&&isAdder?'<button onclick="event.stopPropagation();removeCollabPlace(\''+p.id+'\')" style="padding:5px 9px;background:var(--gray-100);border:none;border-radius:8px;color:var(--gray-400);font-size:12px;cursor:pointer;flex-shrink:0;margin-right:4px">✕</button>':"";
   var secBadgeLabel=secId?"Move":"＋ Section";
   var secBadge='<button class="sec-place-badge" onclick="event.stopPropagation();moveToSection(\''+p.id+'\','+(secId?'\''+secId+'\'':'null')+')" style="'+(secId&&accentColor?'border-color:'+accentColor+';color:'+accentColor+';background:'+accentColor+'18':'')+'" >'+secBadgeLabel+'</button>';
-  return'<div style="padding:0 12px 3px"><div class="pcard"><div class="pcard-main" onclick="openSheet(\''+p.id+'\')">'+thumb+'<div class="pinfo"><div class="pname">'+p.name+'</div><div class="pmeta"><span class="ptype-tag">'+emo(p.type)+' '+(p.type||'place')+'</span>'+rating+vtag+'</div>'+attribution+'</div>'+removeBtn+secBadge+'</div></div></div>';
+  return'<div style="padding:0 12px 3px"><div class="pcard"><div class="pcard-main" onclick="openSheet(\''+p.id+'\')">'+thumb+'<div class="pinfo"><div class="pname">'+esc(p.name)+'</div><div class="pmeta"><span class="ptype-tag">'+emo(p.type)+' '+esc(p.type||'place')+'</span>'+rating+vtag+'</div>'+attribution+'</div>'+removeBtn+secBadge+'</div></div></div>';
 }
 
 
@@ -1449,7 +1451,7 @@ function openSecModal(secId){
     '<div class="bsheet">'+
     '<div class="bsheet-handle"><div class="bsheet-handle-bar"></div></div>'+
     '<div class="bsheet-pad"><div class="bsheet-title">Edit Section</div>'+
-    '<input class="modal-input" id="secNameInput" placeholder="Section name…" value="'+sec.name+'"/>'+
+    '<input class="modal-input" id="secNameInput" placeholder="Section name…" value="'+esc(sec.name)+'"/>'+
     '<div class="modal-btns"><button class="mbtn secondary" style="color:var(--red)" onclick="deleteSection(\''+secId+'\')">Delete</button><button class="mbtn primary" onclick="renameSection(\''+secId+'\')">Save</button></div>'+
     '</div></div></div>';
   document.body.insertAdjacentHTML("beforeend",html);
@@ -1578,7 +1580,8 @@ function saveDates(){
   // Auto-create day sections if none exist and dates are set
   if(start&&end&&sections.length===0){
     var d1=new Date(start+"T12:00:00");var d2=new Date(end+"T12:00:00");
-    var numDays=Math.min(Math.round((d2-d1)/86400000)+1,14);
+    if(d2<d1){showToast("End date must be after start date");return;}
+    var numDays=Math.min(Math.round((d2-d1)/86400000)+1,60);
     sections=[];sectionMap={};
     for(var i=0;i<numDays;i++){
       var d=new Date(d1.getTime()+i*86400000);
@@ -1633,7 +1636,7 @@ function showColModal(nameVal,title,btnLabel){
     '<div class="bsheet-handle" id="colModalHandle"><div class="bsheet-handle-bar"></div></div>'+
     '<div class="bsheet-pad">'+
     '<div class="bsheet-title">'+title+'</div>'+
-    '<input class="modal-input" id="colNameInput" placeholder="Collection name…" value="'+nameVal+'"/>'+
+    '<input class="modal-input" id="colNameInput" placeholder="Collection name…" value="'+esc(nameVal)+'"/>'+
     '<div class="modal-label">Trip Dates (optional)</div>'+
     '<div class="date-row" style="margin-bottom:14px"><div class="date-field"><label>From</label><input type="date" id="colStartDate" value="'+startVal+'"/></div><div class="date-field"><label>To</label><input type="date" id="colEndDate" value="'+endVal+'"/></div></div>'+
     '<div class="modal-label">Icon</div><div class="emoji-grid">'+emojiGrid+'</div>'+
@@ -1662,8 +1665,9 @@ async function saveCol(){
   var hadDates=existingCol?.startDate&&existingCol?.endDate;
   if(startDate&&endDate&&!hadDates&&sections.length===0){
     var d1=new Date(startDate);var d2=new Date(endDate);
+    if(d2<d1){showToast("End date must be after start date");return;}
     var dayMs=86400000;var numDays=Math.round((d2-d1)/dayMs)+1;
-    numDays=Math.min(numDays,14);
+    numDays=Math.min(numDays,60);
     sections=[];
     for(var i=0;i<numDays;i++){
       var d=new Date(d1.getTime()+i*dayMs);
@@ -2345,8 +2349,9 @@ function saveSharedCollection(){
   var data=currentShareData;
   var colId="col"+Date.now();
   var newCol={id:colId,name:data.n,emoji:data.e||"🗺️",color:"#2563EB",placeIds:[],sections:[],sectionMap:{},createdAt:new Date().toISOString(),aiCover:null};
-  var newPlaces=data.p.map(function(p){
-    var id="sp"+Date.now()+Math.random().toString(36).slice(2,6);
+  var _bulkBase=Date.now();
+  var newPlaces=data.p.map(function(p,i){
+    var id="sp"+_bulkBase+"_"+i;
     newCol.placeIds.push(id);
     return{id:id,name:p.n,type:p.t||"default",lat:p.la,lng:p.lo,city:p.ci,country:p.co,photoUrl:p.ph||null,rating:p.r||null,visited:false,addedAt:new Date().toISOString()};
   });
@@ -2597,7 +2602,7 @@ function openSheet(id){
   if(p.openNow!==null&&p.openNow!==undefined)pills+='<span class="spill '+(p.openNow?'open':'closed')+'">'+(p.openNow?'Open now':'Closed')+'</span>';
   if(p.priceLevel)pills+='<span class="spill price">'+priceStr(p.priceLevel)+'</span>';
   var mapsUrl="https://www.google.com/maps/search/"+encodeURIComponent([p.name,p.city,p.country].filter(Boolean).join(" "));
-  var websiteBtn=p.website?'<a class="sact sec" href="'+p.website+'" target="_blank">🌐 Website</a>':'';
+  var websiteBtn=safeUrl(p.website)?'<a class="sact sec" href="'+esc(p.website)+'" target="_blank" rel="noopener noreferrer">🌐 Website</a>':'';
   var colsForPlace=collections.filter(function(c){return(c.placeIds||[]).includes(p.id);});
   var colTag=colsForPlace.length?'<div style="margin-bottom:12px;font-size:12.5px;color:#7C3AED;">🗂 In: '+colsForPlace.map(function(c){return c.emoji+' '+c.name;}).join(', ')+'</div>':'';
   var html='<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheetOutside(event)"><div class="sheet">'+
@@ -2707,7 +2712,19 @@ document.getElementById("addInput").addEventListener("keydown",function(e){if(e.
 document.getElementById("addBtn").addEventListener("click",doAdd);
 
 // ── PWA ─────────────────────────────────────────────────────────────────────
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(e){console.warn('Service worker registration failed:',e);});}
+
+// Offline detection banner
+(function(){
+  function setOffline(offline){
+    var b=document.getElementById('offlineBanner');
+    if(!b){b=document.createElement('div');b.id='offlineBanner';b.style.cssText='position:fixed;top:0;left:0;right:0;background:#1e293b;color:#fff;text-align:center;padding:8px;font-size:13px;z-index:99998;display:none;';b.textContent='You\'re offline — changes will sync when reconnected';document.body.appendChild(b);}
+    b.style.display=offline?'block':'none';
+  }
+  window.addEventListener('online',function(){setOffline(false);});
+  window.addEventListener('offline',function(){setOffline(true);});
+  if(!navigator.onLine)setOffline(true);
+})();
 
 // ── SPLASH DISMISS ─────────────────────────────────────────────────────────
 function hideSplash(){

@@ -5,18 +5,29 @@ const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
-app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"], allowedHeaders: ["Content-Type", "Authorization"] }));
-app.use(express.json({ limit: "10mb" }));
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://hoplist-app.edgeone.app";
+const BACKEND_URL = process.env.BACKEND_URL || "https://roamy-backend.onrender.com";
+
+app.use(cors({ origin: FRONTEND_URL, methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], allowedHeaders: ["Content-Type", "Authorization"] }));
+app.use(express.json({ limit: "5mb" }));
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
 const GOOGLE_KEY = process.env.GOOGLE_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET || "roamy-secret-2024-change-this";
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://roamyclone.edgeone.app";
-const BACKEND_URL = process.env.BACKEND_URL || "https://roamy-backend.onrender.com";
-if (!process.env.JWT_SECRET) console.warn("WARNING: JWT_SECRET env var not set, using insecure default");
+
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable is not set");
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Token byte lengths
+const SHARE_TOKEN_BYTES = 16;
+const COLLAB_TOKEN_BYTES = 16;
+const PLACE_ID_BYTES = 8;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -84,6 +95,9 @@ async function setupDB() {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS idx_collab_collections_owner ON collab_collections (collection_id, owner_id);
     CREATE UNIQUE INDEX IF NOT EXISTS idx_collection_invites_unique ON collection_invites (collection_id, owner_id, invitee_email);
+    CREATE INDEX IF NOT EXISTS idx_places_user_id ON places (user_id);
+    CREATE INDEX IF NOT EXISTS idx_collections_user_id ON collections (user_id);
+    CREATE INDEX IF NOT EXISTS idx_collab_places_token ON collab_places (collab_token);
   `);
   console.log("DB setup complete");
 }
@@ -96,7 +110,7 @@ function authMiddleware(req, res, next) {
     req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch(e) {
-    res.status(401).json({ error: "Invalid token" });
+    return res.status(401).json({ error: "Invalid token" });
   }
 }
 
@@ -180,6 +194,9 @@ app.get("/sync", authMiddleware, async (req, res) => {
 // Full sync push (upsert all places + collections)
 app.post("/sync", authMiddleware, async (req, res) => {
   var { places, collections } = req.body;
+  if ((places && places.length > 10000) || (collections && collections.length > 1000)) {
+    return res.status(400).json({ error: "Payload too large" });
+  }
   var client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -221,7 +238,8 @@ app.post("/places", authMiddleware, async (req, res) => {
     );
     res.json({ success: true });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error("Place upsert error:", e.message);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -231,7 +249,8 @@ app.delete("/places/:id", authMiddleware, async (req, res) => {
     await pool.query("DELETE FROM places WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
     res.json({ success: true });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error("Place delete error:", e.message);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -246,18 +265,26 @@ app.post("/collections", authMiddleware, async (req, res) => {
     );
     res.json({ success: true });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error("Collection upsert error:", e.message);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
 // Delete collection
 app.delete("/collections/:id", authMiddleware, async (req, res) => {
+  var client = await pool.connect();
   try {
-    await pool.query("DELETE FROM collections WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
-    await pool.query("DELETE FROM collection_invites WHERE collection_id = $1 AND owner_id = $2", [req.params.id, req.user.id]);
+    await client.query("BEGIN");
+    await client.query("DELETE FROM collections WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
+    await client.query("DELETE FROM collection_invites WHERE collection_id = $1 AND owner_id = $2", [req.params.id, req.user.id]);
+    await client.query("COMMIT");
     res.json({ success: true });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    await client.query("ROLLBACK");
+    console.error("Collection delete error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  } finally {
+    client.release();
   }
 });
 
@@ -300,7 +327,8 @@ app.get("/invites/:token", authMiddleware, async (req, res) => {
     var colRes = await pool.query("SELECT data FROM collections WHERE id = $1 AND user_id = $2", [invite.collection_id, invite.owner_id]);
     res.json({ success: true, collection: colRes.rows[0]?.data });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error("Accept invite error:", e.message);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -310,6 +338,15 @@ const SCRAPE_HEADERS = {
   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
 };
+
+function validatePublicUrl(url) {
+  var parsed;
+  try { parsed = new URL(url); } catch(e) { throw new Error("Invalid URL"); }
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Invalid protocol");
+  var h = parsed.hostname.toLowerCase();
+  if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0" || h === "::1") throw new Error("Private URL");
+  if (/^169\.254\.|^10\.|^192\.168\.|^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) throw new Error("Private URL");
+}
 
 async function scrape(url) {
   var caption = "", author = "";
@@ -386,14 +423,18 @@ app.get("/photo", async (req, res) => {
   } catch(e) { res.status(500).send("Photo failed"); }
 });
 
-app.post("/extract", authMiddleware, async (req, res) => {
+const extractLimiter = rateLimit({ windowMs: 60 * 1000, max: 15, standardHeaders: true, legacyHeaders: false, message: { error: "Too many requests, please slow down" } });
+const coverLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false, message: { error: "Too many requests, please slow down" } });
+
+app.post("/extract", extractLimiter, authMiddleware, async (req, res) => {
   var input = req.body.input;
   if (!input || !input.trim()) return res.status(400).json({ error: "No input provided" });
-  var trimmed = input.trim();
+  var trimmed = input.trim().slice(0, 5000);
   var isUrl = /^https?:\/\//i.test(trimmed);
   var context = trimmed;
   if (isUrl) {
-    try { var scraped = await scrape(trimmed); console.log("Caption:", scraped.caption.slice(0, 100)); if (scraped.caption) context = "URL: " + trimmed + "\nCaption: " + scraped.caption + "\nAuthor: " + scraped.author; } catch(e) {}
+    try { validatePublicUrl(trimmed); } catch(e) { return res.status(400).json({ error: "Invalid URL" }); }
+    try { var scraped = await scrape(trimmed); if (scraped.caption) context = "URL: " + trimmed + "\nCaption: " + scraped.caption + "\nAuthor: " + scraped.author; } catch(e) {}
   }
   var aiPlaces;
   try { aiPlaces = await askAI(context); console.log("AI found", aiPlaces.length, "places"); } catch(e) { return res.status(500).json({ error: "Could not identify any places." }); }
@@ -405,7 +446,7 @@ app.post("/extract", authMiddleware, async (req, res) => {
 });
 
 // ── AI COVER IMAGE GENERATION via Unsplash ────────────────────────────────────
-app.post("/generate-cover", authMiddleware, async (req, res) => {
+app.post("/generate-cover", coverLimiter, authMiddleware, async (req, res) => {
   var { collectionName, places } = req.body;
   if (!collectionName) return res.status(400).json({ error: "Collection name required" });
 
@@ -450,12 +491,13 @@ app.post("/generate-cover", authMiddleware, async (req, res) => {
 app.post("/share", authMiddleware, async (req, res) => {
   var data = req.body.data;
   if (!data) return res.status(400).json({ error: "No data" });
-  var token = crypto.randomBytes(5).toString("hex");
+  var token = crypto.randomBytes(SHARE_TOKEN_BYTES).toString("hex");
   try {
     await pool.query("INSERT INTO shares (token, data) VALUES ($1, $2)", [token, JSON.stringify(data)]);
     res.json({ success: true, token, url: FRONTEND_URL + "/?s=" + token });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error("Share create error:", e.message);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -465,7 +507,8 @@ app.get("/share/:token", async (req, res) => {
     if (!result.rows.length) return res.status(404).json({ error: "Share not found" });
     res.json({ success: true, data: result.rows[0].data });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    console.error("Share get error:", e.message);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -477,7 +520,7 @@ app.post("/collections/:id/collab", authMiddleware, async (req, res) => {
   try {
     var colRes = await pool.query("SELECT data FROM collections WHERE id=$1 AND user_id=$2", [colId, req.user.id]);
     if (!colRes.rows.length) return res.status(404).json({ error: "Collection not found" });
-    var token = crypto.randomBytes(6).toString("hex");
+    var token = crypto.randomBytes(COLLAB_TOKEN_BYTES).toString("hex");
     var colData = colRes.rows[0].data;
     var initState = { sections: colData.sections || [], sectionMap: colData.sectionMap || {} };
     var inserted = await pool.query(
@@ -489,7 +532,10 @@ app.post("/collections/:id/collab", authMiddleware, async (req, res) => {
       return res.json({ success: true, token: fetched.rows[0].collab_token });
     }
     res.json({ success: true, token });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) {
+    console.error("Collab enable error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 // Disable collab
@@ -497,7 +543,10 @@ app.delete("/collections/:id/collab", authMiddleware, async (req, res) => {
   try {
     await pool.query("DELETE FROM collab_collections WHERE collection_id=$1 AND owner_id=$2", [req.params.id, req.user.id]);
     res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) {
+    console.error("Collab disable error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 // GET /collab/:token — returns full merged state (no auth required)
@@ -542,19 +591,26 @@ app.get("/collab/:token", async (req, res) => {
       places: allPlaces,
       ownerId: row.owner_id
     });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) {
+    console.error("Collab get error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-// PATCH /collab/:token/state — update sections + sectionMap (anyone with auth)
+// PATCH /collab/:token/state — update sections + sectionMap (owner only)
 app.patch("/collab/:token/state", authMiddleware, async (req, res) => {
   var { sections, sectionMap } = req.body;
   try {
-    var cc = await pool.query("SELECT collab_token FROM collab_collections WHERE collab_token=$1", [req.params.token]);
+    var cc = await pool.query("SELECT owner_id FROM collab_collections WHERE collab_token=$1", [req.params.token]);
     if (!cc.rows.length) return res.status(404).json({ error: "Not found" });
+    if (cc.rows[0].owner_id !== req.user.id) return res.status(403).json({ error: "Not authorized" });
     var newState = { sections: sections || [], sectionMap: sectionMap || {} };
     await pool.query("UPDATE collab_collections SET shared_state=$1 WHERE collab_token=$2", [JSON.stringify(newState), req.params.token]);
     res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) {
+    console.error("Collab state error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 // POST /collab/:token/places — add one place (auth required)
@@ -564,14 +620,17 @@ app.post("/collab/:token/places", authMiddleware, async (req, res) => {
   try {
     var cc = await pool.query("SELECT collab_token FROM collab_collections WHERE collab_token=$1", [req.params.token]);
     if (!cc.rows.length) return res.status(404).json({ error: "Collab not found" });
-    var id = "cp" + crypto.randomBytes(8).toString("hex");
+    var id = "cp" + crypto.randomBytes(PLACE_ID_BYTES).toString("hex");
     place.id = id;
     await pool.query(
       "INSERT INTO collab_places (id, collab_token, added_by_id, added_by_name, data) VALUES ($1,$2,$3,$4,$5)",
       [id, req.params.token, req.user.id, req.user.email.split("@")[0], JSON.stringify(place)]
     );
     res.json({ success: true, id });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) {
+    console.error("Collab add place error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 // DELETE /collab/:token/places/:placeId — owner can remove any, others only their own
@@ -593,14 +652,34 @@ app.delete("/collab/:token/places/:placeId", authMiddleware, async (req, res) =>
     });
     await pool.query("UPDATE collab_collections SET shared_state=$1 WHERE collab_token=$2", [JSON.stringify(state), req.params.token]);
     res.json({ success: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) {
+    console.error("Collab remove place error:", e.message);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
-app.get("/", (req, res) => res.json({ status: "Roamy backend running ✈", db: "connected" }));
+// ── HEALTH CHECK ──────────────────────────────────────────────────────────────
+app.get("/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.json({ status: "ok", db: "connected" });
+  } catch(e) {
+    res.status(503).json({ status: "error", db: "disconnected" });
+  }
+});
+
+app.get("/", (req, res) => res.json({ status: "Hoplist backend running ✈", db: "connected" }));
 
 const PORT = process.env.PORT || 10000;
 setupDB().then(function() {
-  app.listen(PORT, function() { console.log("Roamy backend listening on port " + PORT); });
+  var server = app.listen(PORT, function() { console.log("Hoplist backend listening on port " + PORT); });
+  process.on("SIGTERM", function() {
+    console.log("SIGTERM received, shutting down gracefully");
+    server.close(async function() {
+      await pool.end();
+      process.exit(0);
+    });
+  });
 }).catch(function(e) {
   console.error("DB setup failed:", e.message);
   process.exit(1);
