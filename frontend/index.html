@@ -1283,7 +1283,7 @@ function renderColDetailPlaces(col){
   }
   tabsHtml+='</div></div>';
   tabsEl.innerHTML=tabsHtml;
-  setTimeout(function(){var at=tabsEl.querySelector(".sec-tab.active");if(at)at.scrollIntoView({inline:"center",behavior:"smooth"});},50);
+  setTimeout(function(){var at=tabsEl.querySelector(".sec-tab.active");if(at)at.scrollIntoView({inline:"center",behavior:"smooth",block:"nearest"});},50);
   var contentPlaces=[];
   if(!hasSections||activeSecId==="__all")contentPlaces=ps;
   else if(activeSecId==="__unsorted")contentPlaces=unsorted;
