@@ -2700,7 +2700,7 @@ async function doAdd(){
   var isLink=/^https?:\/\//i.test(trimmed);
   showToast("add","tl",isLink?"Scraping post…":"Finding places…","AI is identifying locations");
   try{
-    var res=await fetch(BACKEND+"/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:trimmed})});
+    var res=await fetch(BACKEND+"/extract",{method:"POST",headers:authHeaders(),body:JSON.stringify({input:trimmed})});
     var data=await res.json();
     if(!res.ok||!data.places||data.places.length===0)throw new Error(data.error||"No places found");
     hideToast("add");openPicker(data.places);
