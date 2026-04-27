@@ -1968,11 +1968,11 @@ function renderCollabPage(data){
     :cp.map(function(p){
       var thumb=p.photoUrl?'<div class="share-place-thumb"><img src="'+p.photoUrl+'" onerror="this.parentElement.innerHTML=\'<div class=share-place-thumb-emo>'+emo(p.type)+'</div>\'"/></div>':'<div class="share-place-thumb"><div class="share-place-thumb-emo">'+emo(p.type)+'</div></div>';
       var canRemove=authToken&&currentUser&&(isOwner||(p.addedById&&p.addedById===currentUser.id));
-      return'<div class="share-place-card">'+thumb+
+      return'<div class="share-place-card" onclick="openSheet(\''+p.id+'\')" style="cursor:pointer">'+thumb+
         '<div class="share-place-info"><div class="share-place-name">'+p.name+'</div>'+
         '<div class="share-place-sub">'+(p.city?p.city+", ":"")+p.country+'</div>'+
         '<div style="font-size:11px;color:var(--gray-400);margin-top:2px">Added by '+p.addedByName+'</div></div>'+
-        (canRemove?'<button onclick="removeCollabPlace(\''+p.id+'\')" style="padding:6px 10px;background:var(--gray-100);border:none;border-radius:8px;color:var(--gray-500);font-size:12px;cursor:pointer;flex-shrink:0">✕</button>':'')+
+        (canRemove?'<button onclick="event.stopPropagation();removeCollabPlace(\''+p.id+'\')" style="padding:6px 10px;background:var(--gray-100);border:none;border-radius:8px;color:var(--gray-500);font-size:12px;cursor:pointer;flex-shrink:0">✕</button>':'')+
         '</div>';
     }).join('');
   // Update join button
@@ -2582,7 +2582,14 @@ function selectCat(id,cat){places=places.map(function(p){return p.id===id?Object
 function saveCustomCat(id){var input=document.getElementById('catCustom-'+id);if(!input)return;var val=input.value.trim().toLowerCase();if(!val)return;selectCat(id,val);}
 
 function openSheet(id){
-  var p=places.find(function(x){return x.id===id;});if(!p)return;
+  var p=places.find(function(x){return x.id===id;});
+  var isExternal=false;
+  if(!p){
+    var fallback=(_collabAllPlaces||[]).concat((collabData&&collabData.collabPlaces)||[]);
+    p=fallback.find(function(x){return x.id===id;});
+    if(!p)return;
+    isExternal=true;
+  }
   var ex=document.getElementById("sheetOverlay");if(ex)ex.remove();
   var photoHtml=p.photoUrl?'<img class="sheet-photo" src="'+p.photoUrl+'" onerror="this.outerHTML=\'<div class=sheet-photo-emo>'+emo(p.type)+'</div>\'"/>':"<div class=\"sheet-photo-emo\">"+emo(p.type)+"</div>";
   var pills='<span class="spill type" onclick="toggleCatEditor(\''+p.id+'\')" title="Change category">'+emo(p.type)+' '+(p.type||'place')+' ✏️</span>';
@@ -2616,8 +2623,8 @@ function openSheet(id){
     '<button class="sact purple half" onclick="openAddToCol(\''+p.id+'\')">🗂️ Add to Collection</button>'+
     '</div>'+
     (websiteBtn?'<div class="sact-row">'+websiteBtn+'</div>':'')+
-    '<div class="sheet-confirm" id="sheetConfirm"><div class="sc-text">Remove this place?</div><div class="sc-btns"><button class="sc-btn no" onclick="document.getElementById(\'sheetConfirm\').classList.remove(\'show\')">Cancel</button><button class="sc-btn yes" onclick="delFromSheet(\''+p.id+'\')">Yes, Remove</button></div></div>'+
-    '<button class="sact dan" onclick="document.getElementById(\'sheetConfirm\').classList.add(\'show\')">🗑️ Remove place</button>'+
+    (!isExternal?'<div class="sheet-confirm" id="sheetConfirm"><div class="sc-text">Remove this place?</div><div class="sc-btns"><button class="sc-btn no" onclick="document.getElementById(\'sheetConfirm\').classList.remove(\'show\')">Cancel</button><button class="sc-btn yes" onclick="delFromSheet(\''+p.id+'\')">Yes, Remove</button></div></div>'+
+    '<button class="sact dan" onclick="document.getElementById(\'sheetConfirm\').classList.add(\'show\')">🗑️ Remove place</button>':'')+
     '</div></div></div></div>';
   document.body.insertAdjacentHTML("beforeend",html);
   enableSwipeDismiss("sheetOverlay",closeSheet);
