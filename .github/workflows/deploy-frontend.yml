@@ -18,4 +18,4 @@ jobs:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Deploy to EdgeOne Pages
-        run: npx edgeone pages deploy frontend -n roamyclone -t ${{ secrets.EDGEONE_API_TOKEN }}
+        run: npx edgeone pages deploy frontend -n hoplist-app -t ${{ secrets.EDGEONE_API_TOKEN }}
