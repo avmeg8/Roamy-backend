@@ -407,12 +407,12 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
 .picker-cancel-btn{width:100%;padding:12px;background:var(--gray-100);color:var(--gray-600);border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
 
 /* AUTH SCREEN */
-.auth-screen{position:fixed;inset:0;background:linear-gradient(160deg,#0D1259 0%,#1A2FB8 45%,#3B5BDB 100%);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;animation:fadeIn 0.4s ease;}
+.auth-screen{position:fixed;inset:0;background:#ffffff;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;animation:fadeIn 0.4s ease;}
 .auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
 .auth-logo-icon{width:52px;height:64px;background:linear-gradient(180deg,rgba(255,255,255,0.85) 0%,rgba(255,255,255,0.55) 100%);border-radius:50% 50% 50% 50% / 38% 38% 62% 62%;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;flex-shrink:0;}
 .auth-logo-icon::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:15px solid rgba(255,255,255,0.55);}
 .auth-logo-text{font-family:'Poppins',sans-serif;font-size:38px;color:white;font-weight:800;letter-spacing:-0.5px;}
-.auth-tagline{font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:36px;text-align:center;}
+.auth-tagline{font-size:15px;color:rgba(0,0,0,0.45);margin-bottom:36px;text-align:center;}
 .auth-card{background:white;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,0.25);}
 .auth-tabs{display:flex;background:var(--gray-100);border-radius:12px;padding:3px;margin-bottom:22px;}
 .auth-tab{flex:1;padding:9px;border:none;background:transparent;border-radius:10px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all 0.2s;}
@@ -584,7 +584,7 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
 <!-- AUTH SCREEN -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-logo">
-    <img src="icon.png" alt="Hoplist" style="width:150px;height:150px;mix-blend-mode:multiply;">
+    <img src="icon.png" alt="Hoplist" style="width:150px;height:150px;">
   </div>
   <div class="auth-tagline">Your travel wishlist, beautifully organized</div>
   <div class="auth-card">
