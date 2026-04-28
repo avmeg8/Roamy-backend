@@ -405,6 +405,42 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
 .picker-save-btn{width:100%;padding:14px;background:var(--blue);color:white;border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
 .picker-save-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .picker-cancel-btn{width:100%;padding:12px;background:var(--gray-100);color:var(--gray-600);border:none;border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+/* Picker collection row (Feature 1) */
+.picker-col-section{padding:0 16px 12px;}
+.picker-col-label{font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.picker-col-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.picker-col-chips::-webkit-scrollbar{display:none;}
+.picker-col-chip{flex-shrink:0;padding:7px 13px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--gray-50);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--gray-700);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.picker-col-chip.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+/* Add-places modal (Feature 2) */
+.add-places-search{width:100%;padding:10px 13px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;box-sizing:border-box;margin-bottom:12px;}
+.add-places-search:focus{border-color:var(--blue);background:var(--white);}
+.add-places-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;}
+.add-place-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gray-100);cursor:pointer;}
+.add-place-item:last-child{border-bottom:none;}
+.add-place-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--gray-300);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;transition:all 0.15s;}
+.add-place-item.selected .add-place-check{background:var(--blue);border-color:var(--blue);color:white;}
+.add-place-emo{width:38px;height:38px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.add-place-info{flex:1;min-width:0;}
+.add-place-name{font-size:14px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.add-place-loc{font-size:12px;color:var(--gray-500);}
+.add-places-footer{position:sticky;bottom:0;background:var(--white);padding:12px 0 0;}
+/* Auto-collect section in collection modal (Feature 3) */
+.auto-rule-section{margin-top:16px;}
+.auto-rule-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.auto-rule-toggle-label{font-size:14px;font-weight:600;color:var(--gray-800);}
+.toggle-sw{position:relative;width:42px;height:24px;flex-shrink:0;}
+.toggle-sw input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;inset:0;background:var(--gray-300);border-radius:12px;cursor:pointer;transition:background 0.2s;}
+.toggle-sw input:checked+.toggle-track{background:var(--blue);}
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:transform 0.2s;}
+.toggle-sw input:checked+.toggle-track::after{transform:translateX(18px);}
+.auto-rule-fields{display:flex;flex-direction:column;gap:8px;}
+.auto-rule-input{width:100%;padding:10px 12px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;box-sizing:border-box;}
+.auto-rule-input:focus{border-color:var(--blue);background:var(--white);}
+.auto-rule-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}
+.auto-rule-type-chip{padding:5px 11px;border-radius:16px;border:1.5px solid var(--gray-200);background:var(--gray-50);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.auto-rule-type-chip.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
 
 /* AUTH SCREEN */
 .auth-screen{position:fixed;inset:0;background:linear-gradient(160deg,#0D1259 0%,#1A2FB8 45%,#3B5BDB 100%);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;animation:fadeIn 0.4s ease;}
@@ -575,7 +611,8 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
         <div class="col-detail-stat" id="colDetailMeta"></div>
         <button class="col-detail-share" onclick="regenCover(currentColId)" style="margin-left:0">🎨</button>
         <button class="col-detail-share" onclick="openCollectionMap()">🗺️</button>
-        <button class="col-detail-share" id="colDetailCollabBtn" style="display:none;background:rgba(16,185,129,0.3)" onclick="openCollabAddPicker()">＋ Add places</button>
+        <button class="col-detail-share" id="colDetailAddBtn" onclick="openAddPlacesToColModal(currentColId)">＋ Add places</button>
+        <button class="col-detail-share" id="colDetailCollabBtn" style="display:none;background:rgba(16,185,129,0.3)" onclick="openCollabAddPicker()">＋ Collab add</button>
         <button class="col-detail-share" onclick="openCollabModal()">👥 Collab</button>
         <button class="col-detail-share" id="colDetailShareBtn" onclick="shareCollection()">🔗 Share</button>
       </div>
@@ -1626,6 +1663,7 @@ function openEditColModal(id){
   showColModal(col.name,"Edit Collection","Save");
 }
 
+var _autoRuleTypes=[];
 function showColModal(nameVal,title,btnLabel){
   var ex=document.getElementById("colModal");if(ex)ex.remove();
   var col=editingColId?collections.find(function(c){return c.id===editingColId;}):null;
@@ -1633,6 +1671,19 @@ function showColModal(nameVal,title,btnLabel){
   var emojiGrid=COL_EMOJIS.map(function(e){return'<button class="emoji-opt'+(e===selectedEmoji?" selected":"")+'" onclick="selectEmoji(\''+e+'\')">'+e+'</button>';}).join('');
   var colorGrid=COL_COLORS.map(function(c){return'<button class="color-opt'+(c===selectedColor?" selected":"")+'" style="background:'+c+'" onclick="selectColColor(\''+c+'\')"></button>';}).join('');
   var delBtn=editingColId?'<button class="mbtn secondary" style="color:var(--red)" onclick="deleteCol()">Delete</button>':'';
+  var existingRule=col?.autoRule||null;
+  var ruleEnabled=!!existingRule;
+  _autoRuleTypes=existingRule?.types?existingRule.types.slice():[];
+  var typeChipsHtml=ALL_CATS.map(function(cat){return'<button class="auto-rule-type-chip'+(_autoRuleTypes.includes(cat.k)?" active":"")+'" id="art-'+cat.k+'" onclick="toggleAutoType(\''+cat.k+'\')">'+cat.l+'</button>';}).join('');
+  var autoRuleHtml='<div class="auto-rule-section">'+
+    '<div class="auto-rule-toggle-row"><span class="auto-rule-toggle-label">Auto-collect</span>'+
+    '<label class="toggle-sw"><input type="checkbox" id="colAutoEnabled"'+(ruleEnabled?' checked':'')+' onchange="toggleAutoRuleFields()"><span class="toggle-track"></span></label></div>'+
+    '<div class="auto-rule-fields" id="autoRuleFields" style="display:'+(ruleEnabled?'flex':'none')+'">'+
+    '<input class="auto-rule-input" id="colAutoCountry" placeholder="Country (e.g. Japan, Israel)" value="'+esc(existingRule?.country||'')+'"/>'+
+    '<input class="auto-rule-input" id="colAutoCity" placeholder="City (optional, e.g. Tel Aviv)" value="'+esc(existingRule?.city||'')+'"/>'+
+    '<div class="modal-label" style="margin-top:6px;margin-bottom:6px">Place types (leave empty for all)</div>'+
+    '<div class="auto-rule-types">'+typeChipsHtml+'</div>'+
+    '</div></div>';
   var html='<div class="modal-overlay" id="colModal" onclick="closeColModal(event)">'+
     '<div class="bsheet">'+
     '<div class="bsheet-handle" id="colModalHandle"><div class="bsheet-handle-bar"></div></div>'+
@@ -1642,10 +1693,22 @@ function showColModal(nameVal,title,btnLabel){
     '<div class="modal-label">Trip Dates (optional)</div>'+
     '<div class="date-row" style="margin-bottom:14px"><div class="date-field"><label>From</label><input type="date" id="colStartDate" value="'+startVal+'"/></div><div class="date-field"><label>To</label><input type="date" id="colEndDate" value="'+endVal+'"/></div></div>'+
     '<div class="modal-label">Icon</div><div class="emoji-grid">'+emojiGrid+'</div>'+
+    autoRuleHtml+
     '<div class="modal-btns"><button class="mbtn secondary" onclick="document.getElementById(\'colModal\').remove()">Cancel</button>'+delBtn+'<button class="mbtn primary" onclick="saveCol()">'+btnLabel+'</button></div>'+
     '</div></div></div>';
   document.body.insertAdjacentHTML("beforeend",html);
   enableSwipeDismiss("colModal",function(){document.getElementById("colModal")?.remove();});
+}
+function toggleAutoRuleFields(){
+  var on=document.getElementById("colAutoEnabled")?.checked;
+  var fields=document.getElementById("autoRuleFields");
+  if(fields)fields.style.display=on?"flex":"none";
+}
+function toggleAutoType(type){
+  var idx=_autoRuleTypes.indexOf(type);
+  if(idx>=0)_autoRuleTypes.splice(idx,1);else _autoRuleTypes.push(type);
+  var chip=document.getElementById("art-"+type);
+  if(chip)chip.classList.toggle("active",_autoRuleTypes.includes(type));
 }
 
 function closeColModal(e){if(e.target.id==="colModal")document.getElementById("colModal").remove();}
@@ -1678,18 +1741,40 @@ async function saveCol(){
       sectionMap[sid]=[];
     }
   }
+  var autoEnabled=document.getElementById("colAutoEnabled")?.checked;
+  var autoCountry=(document.getElementById("colAutoCountry")?.value||"").trim();
+  var autoCity=(document.getElementById("colAutoCity")?.value||"").trim();
+  var autoRule=null;
+  if(autoEnabled&&(autoCountry||autoCity||_autoRuleTypes.length>0)){
+    autoRule={};
+    if(autoCountry)autoRule.country=autoCountry;
+    if(autoCity)autoRule.city=autoCity;
+    if(_autoRuleTypes.length>0)autoRule.types=_autoRuleTypes.slice();
+  }
+  var oldRule=existingCol?.autoRule||null;
   var updatedCol={
     id:colId,name:name,emoji:selectedEmoji,color:selectedColor,
     placeIds:existingCol?existingCol.placeIds:[],
     sections:sections,sectionMap:sectionMap,
     startDate:startDate,endDate:endDate,
     createdAt:existingCol?existingCol.createdAt:new Date().toISOString(),
-    aiCover:existingCol?.aiCover||null
+    aiCover:existingCol?.aiCover||null,
+    autoRule:autoRule
   };
   if(editingColId){
     collections=collections.map(function(c){return c.id===editingColId?updatedCol:c;});
   } else {
     collections.push(updatedCol);
+  }
+  if(autoRule&&JSON.stringify(autoRule)!==JSON.stringify(oldRule)){
+    var retroCol=collections.find(function(c){return c.id===colId;});
+    if(retroCol){
+      var retroAdded=places.filter(function(p){return matchesAutoRule(p,autoRule)&&!retroCol.placeIds.includes(p.id);});
+      if(retroAdded.length>0){
+        retroCol.placeIds=Array.from(new Set(retroCol.placeIds.concat(retroAdded.map(function(p){return p.id;}))));
+        setTimeout(function(){showToast("retro","ts","Auto-added "+retroAdded.length+" existing place"+(retroAdded.length!==1?"s":"")+" to "+name);},400);
+      }
+    }
   }
   save();
   document.getElementById("colModal").remove();
@@ -2643,11 +2728,11 @@ function toggleVisSheet(id){toggleVis(id,null);closeSheet();openSheet(id);}
 function delFromSheet(id){closeSheet();confirmDelete(id);}
 
 // ── MULTI PLACE PICKER ─────────────────────────────────────────────────────
-var pickerSelected={};var pickerPlaces=[];
+var pickerSelected={};var pickerPlaces=[];var pickerColId=null;
 
 function openPicker(incomingPlaces){
   var ex=document.getElementById("pickerOverlay");if(ex)ex.remove();
-  pickerSelected={};pickerPlaces=incomingPlaces;
+  pickerSelected={};pickerPlaces=incomingPlaces;pickerColId=null;
   pickerPlaces.forEach(function(p,i){pickerSelected[i]=true;});
   var placesHtml=pickerPlaces.map(function(p,i){
     var thumb=p.photoUrl?'<div class="picker-thumb"><img src="'+p.photoUrl+'" onerror="this.parentElement.innerHTML=\'<div class=picker-thumb-emo>'+emo(p.type)+'</div>\'"/></div>':'<div class="picker-thumb"><div class="picker-thumb-emo">'+emo(p.type)+'</div></div>';
@@ -2655,10 +2740,21 @@ function openPicker(incomingPlaces){
     return'<div class="picker-place selected" id="pp-'+i+'" onclick="togglePickerPlace('+i+')"><div class="picker-place-check">✓</div>'+thumb+'<div class="picker-info"><div class="picker-name">'+p.name+'</div><div class="picker-meta"><span class="picker-type">'+emo(p.type)+' '+(p.type||'place')+'</span><span>'+(p.city||'')+', '+(p.country||'')+rating+'</span></div></div></div>';
   }).join('');
   var single=pickerPlaces.length===1;
-  var html='<div class="picker-overlay" id="pickerOverlay"><div class="picker"><div class="picker-handle"></div><div class="picker-header"><div class="picker-title">'+(single?'Save this place?':pickerPlaces.length+' places found!')+'</div><div class="picker-sub">'+(single?'Confirm and optionally add a note.':'Select which places to save.')+'</div></div><div class="picker-places">'+placesHtml+'</div><div class="picker-notes-wrap"><div class="picker-notes-label">📝 Add a note (optional)</div><textarea class="picker-notes-input" id="pickerNotes" placeholder="Why you want to visit, who recommended it…"></textarea></div><div class="picker-footer"><button class="picker-save-btn" id="pickerSaveBtn" onclick="savePicked()">Save Selected</button><button class="picker-cancel-btn" onclick="closePicker()">Cancel</button></div></div></div>';
+  var colChipsHtml='';
+  if(collections.length>0){
+    var chips=collections.map(function(c){return'<button class="picker-col-chip" id="pcc-'+c.id+'" onclick="togglePickerCol(\''+c.id+'\')">'+(c.emoji||'🗺️')+' '+esc(c.name)+'</button>';}).join('');
+    colChipsHtml='<div class="picker-col-section"><div class="picker-col-label">Save to collection (optional)</div><div class="picker-col-chips">'+chips+'</div></div>';
+  }
+  var html='<div class="picker-overlay" id="pickerOverlay"><div class="picker"><div class="picker-handle"></div><div class="picker-header"><div class="picker-title">'+(single?'Save this place?':pickerPlaces.length+' places found!')+'</div><div class="picker-sub">'+(single?'Confirm and optionally add a note.':'Select which places to save.')+'</div></div><div class="picker-places">'+placesHtml+'</div><div class="picker-notes-wrap"><div class="picker-notes-label">📝 Add a note (optional)</div><textarea class="picker-notes-input" id="pickerNotes" placeholder="Why you want to visit, who recommended it…"></textarea></div>'+colChipsHtml+'<div class="picker-footer"><button class="picker-save-btn" id="pickerSaveBtn" onclick="savePicked()">Save Selected</button><button class="picker-cancel-btn" onclick="closePicker()">Cancel</button></div></div></div>';
   document.body.insertAdjacentHTML('beforeend',html);
   pushBackState("picker");
   enableSwipeDismiss("pickerOverlay",closePicker);
+}
+
+function togglePickerCol(colId){
+  if(pickerColId===colId){pickerColId=null;}else{pickerColId=colId;}
+  document.querySelectorAll(".picker-col-chip").forEach(function(el){el.classList.remove("active");});
+  if(pickerColId){var el=document.getElementById("pcc-"+pickerColId);if(el)el.classList.add("active");}
 }
 
 function togglePickerPlace(i){pickerSelected[i]=!pickerSelected[i];var el=document.getElementById('pp-'+i);var check=el.querySelector('.picker-place-check');if(pickerSelected[i]){el.classList.add('selected');check.textContent='✓';}else{el.classList.remove('selected');check.textContent='';}var any=Object.values(pickerSelected).some(function(v){return v;});document.getElementById('pickerSaveBtn').disabled=!any;}
@@ -2674,9 +2770,74 @@ function savePicked(){
   pickerPlaces.forEach(function(p,i){if(!pickerSelected[i])return;toSave.push(Object.assign({id:Date.now().toString()+i+Math.random().toString(36).slice(2,6),visited:false,addedAt:new Date().toISOString(),notes:note},p));});
   if(toSave.length===0)return;
   toSave.forEach(function(p){places.unshift(p);});
-  closePicker();save();renderList();if(mapInited)renderMapMarkers();
+  if(pickerColId){
+    var targetCol=collections.find(function(c){return c.id===pickerColId;});
+    if(targetCol){var newIds=toSave.map(function(p){return p.id;});targetCol.placeIds=Array.from(new Set(targetCol.placeIds.concat(newIds)));}
+  }
+  applyAutoCollect(toSave);
+  closePicker();save();renderList();renderCollections();if(mapInited)renderMapMarkers();
   showToast('add','ts',toSave.length+' place'+(toSave.length>1?'s':'')+' saved!',toSave.map(function(p){return p.name;}).join(', '));
   if(toSave.length===1)setTimeout(function(){openSheet(toSave[0].id);},400);
+}
+
+// ── AUTO-COLLECT (Feature 3) ────────────────────────────────────────────────
+function matchesAutoRule(p,rule){
+  if(!rule)return false;
+  if(rule.country&&(!p.country||p.country.toLowerCase()!==rule.country.toLowerCase()))return false;
+  if(rule.city&&(!p.city||p.city.toLowerCase()!==rule.city.toLowerCase()))return false;
+  if(rule.types&&rule.types.length>0&&!rule.types.includes((p.type||'').toLowerCase()))return false;
+  return true;
+}
+function applyAutoCollect(placeList){
+  if(!placeList||placeList.length===0)return 0;
+  var total=0;
+  collections.forEach(function(col){
+    if(!col.autoRule)return;
+    var matched=placeList.filter(function(p){return matchesAutoRule(p,col.autoRule)&&!col.placeIds.includes(p.id);});
+    if(matched.length>0){col.placeIds=Array.from(new Set(col.placeIds.concat(matched.map(function(p){return p.id;}))));total+=matched.length;}
+  });
+  return total;
+}
+
+// ── ADD PLACES TO COLLECTION (Feature 2) ──────────────────────────────────
+var _addPlacesPick={};
+function openAddPlacesToColModal(colId){
+  var col=collections.find(function(c){return c.id===colId;});if(!col)return;
+  _addPlacesPick={};
+  document.getElementById("addPlacesModal")?.remove();
+  var html='<div class="modal-overlay" id="addPlacesModal" onclick="closeAddPlacesModal(event)"><div class="bsheet"><div class="bsheet-handle" id="addPlacesHandle"><div class="bsheet-handle-bar"></div></div><div class="bsheet-pad"><div class="bsheet-title">Add to '+esc(col.name)+'</div><input class="add-places-search" id="addPlacesSearch" placeholder="Search your saved places…" oninput="renderAddPlacesList(\''+colId+'\')" /><div class="add-places-list" id="addPlacesList"></div><div class="add-places-footer"><button class="mbtn primary" style="width:100%" id="addPlacesDoneBtn" onclick="saveAddPlacesToCol(\''+colId+'\')" disabled>Add 0 places</button></div></div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+  renderAddPlacesList(colId);
+  enableSwipeDismiss("addPlacesModal",function(){document.getElementById("addPlacesModal")?.remove();});
+}
+function closeAddPlacesModal(e){if(e.target.id==="addPlacesModal")document.getElementById("addPlacesModal").remove();}
+function renderAddPlacesList(colId){
+  var col=collections.find(function(c){return c.id===colId;});if(!col)return;
+  var q=(document.getElementById("addPlacesSearch")?.value||"").toLowerCase().trim();
+  var available=places.filter(function(p){
+    if(col.placeIds.includes(p.id))return false;
+    if(!q)return true;
+    return(p.name||"").toLowerCase().includes(q)||(p.city||"").toLowerCase().includes(q)||(p.country||"").toLowerCase().includes(q);
+  });
+  var html=available.length===0?'<div style="padding:20px 0;text-align:center;color:var(--gray-400);font-size:14px">'+(q?"No matches":"All your places are already in this collection")+'</div>':available.map(function(p){var sel=!!_addPlacesPick[p.id];return'<div class="add-place-item'+(sel?" selected":"")+'" onclick="toggleAddPlacePick(\''+colId+'\',\''+p.id+'\')" id="api-'+p.id+'"><div class="add-place-check">'+(sel?"✓":"")+'</div><div class="add-place-emo">'+emo(p.type)+'</div><div class="add-place-info"><div class="add-place-name">'+esc(p.name)+'</div><div class="add-place-loc">'+esc([p.city,p.country].filter(Boolean).join(", "))+'</div></div></div>';}).join('');
+  document.getElementById("addPlacesList").innerHTML=html;
+}
+function toggleAddPlacePick(colId,placeId){
+  _addPlacesPick[placeId]=!_addPlacesPick[placeId];
+  if(!_addPlacesPick[placeId])delete _addPlacesPick[placeId];
+  var el=document.getElementById("api-"+placeId);
+  if(el){el.classList.toggle("selected",!!_addPlacesPick[placeId]);var chk=el.querySelector(".add-place-check");if(chk)chk.textContent=_addPlacesPick[placeId]?"✓":"";}
+  var count=Object.keys(_addPlacesPick).length;
+  var btn=document.getElementById("addPlacesDoneBtn");
+  if(btn){btn.disabled=count===0;btn.textContent="Add "+count+" place"+(count!==1?"s":"");}
+}
+function saveAddPlacesToCol(colId){
+  var col=collections.find(function(c){return c.id===colId;});if(!col)return;
+  var ids=Object.keys(_addPlacesPick);if(ids.length===0)return;
+  col.placeIds=Array.from(new Set(col.placeIds.concat(ids)));
+  save();document.getElementById("addPlacesModal")?.remove();
+  renderColDetailPlaces(col);renderCollections();
+  showToast("addpl","ts","Added "+ids.length+" place"+(ids.length!==1?"s":"")+" to "+col.name);
 }
 
 // ── TOASTS ─────────────────────────────────────────────────────────────────
