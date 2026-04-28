@@ -2790,9 +2790,12 @@ function savePicked(){
 // ── AUTO-COLLECT (Feature 3) ────────────────────────────────────────────────
 function matchesAutoRule(p,rule){
   if(!rule)return false;
-  if(rule.country&&(!p.country||p.country.toLowerCase()!==rule.country.toLowerCase()))return false;
-  if(rule.city&&(!p.city||p.city.toLowerCase()!==rule.city.toLowerCase()))return false;
-  if(rule.types&&rule.types.length>0&&!rule.types.includes((p.type||'').toLowerCase()))return false;
+  var pc=(p.country||"").trim().toLowerCase();
+  var pi=(p.city||"").trim().toLowerCase();
+  var pt=(p.type||"").trim().toLowerCase();
+  if(rule.country&&pc!==rule.country.trim().toLowerCase())return false;
+  if(rule.city&&pi!==rule.city.trim().toLowerCase())return false;
+  if(rule.types&&rule.types.length>0&&!rule.types.map(function(t){return t.toLowerCase();}).includes(pt))return false;
   return true;
 }
 function applyAutoCollect(placeList){
@@ -2801,7 +2804,11 @@ function applyAutoCollect(placeList){
   collections.forEach(function(col){
     if(!col.autoRule)return;
     var matched=placeList.filter(function(p){return matchesAutoRule(p,col.autoRule)&&!col.placeIds.includes(p.id);});
-    if(matched.length>0){col.placeIds=Array.from(new Set(col.placeIds.concat(matched.map(function(p){return p.id;}))));total+=matched.length;}
+    if(matched.length>0){
+      col.placeIds=Array.from(new Set(col.placeIds.concat(matched.map(function(p){return p.id;}))));
+      total+=matched.length;
+      setTimeout(function(){showToast("ac-"+col.id,"ts","Auto-collected to "+col.name,matched.map(function(p){return p.name;}).join(", "));},600);
+    }
   });
   return total;
 }
