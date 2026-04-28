@@ -393,7 +393,7 @@ Text: ` + text;
 
 async function searchGooglePlace(query) {
   try {
-    var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,photos,opening_hours,price_level&key=" + GOOGLE_KEY;
+    var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,address_components,photos,opening_hours,price_level&key=" + GOOGLE_KEY;
     var res = await axios.get(url, { timeout: 8000 });
     if (res.data.error_message) console.error("Google error:", res.data.error_message);
     var candidates = res.data.candidates;
@@ -408,7 +408,15 @@ async function getGoogleData(name, city, country) {
   if (!place) return null;
   var photoUrl = null;
   if (place.photos && place.photos.length > 0) photoUrl = BACKEND_URL + "/photo?ref=" + encodeURIComponent(place.photos[0].photo_reference);
-  return { rating: place.rating || null, totalRatings: place.user_ratings_total || null, address: place.formatted_address || null, photoUrl, openNow: place.opening_hours ? place.opening_hours.open_now : null, priceLevel: place.price_level || null };
+  var gCountry = null, gCity = null;
+  var comps = place.address_components || [];
+  var countryComp = comps.find(function(c){ return c.types.includes("country"); });
+  var cityComp = comps.find(function(c){ return c.types.includes("locality"); }) ||
+                 comps.find(function(c){ return c.types.includes("administrative_area_level_2"); }) ||
+                 comps.find(function(c){ return c.types.includes("administrative_area_level_1"); });
+  if (countryComp) gCountry = countryComp.long_name;
+  if (cityComp) gCity = cityComp.long_name;
+  return { rating: place.rating || null, totalRatings: place.user_ratings_total || null, address: place.formatted_address || null, photoUrl, openNow: place.opening_hours ? place.opening_hours.open_now : null, priceLevel: place.price_level || null, gCountry, gCity };
 }
 
 app.get("/photo", async (req, res) => {
@@ -439,7 +447,14 @@ app.post("/extract", extractLimiter, authMiddleware, async (req, res) => {
   var aiPlaces;
   try { aiPlaces = await askAI(context); console.log("AI found", aiPlaces.length, "places"); } catch(e) { return res.status(500).json({ error: "Could not identify any places." }); }
   var enriched = await Promise.all(aiPlaces.map(async function(place) {
-    try { var g = await getGoogleData(place.name, place.city, place.country); if (g) Object.assign(place, g); } catch(e) {}
+    try {
+      var g = await getGoogleData(place.name, place.city, place.country);
+      if (g) {
+        Object.assign(place, { rating: g.rating, totalRatings: g.totalRatings, address: g.address, photoUrl: g.photoUrl, openNow: g.openNow, priceLevel: g.priceLevel });
+        if (!place.country && g.gCountry) place.country = g.gCountry;
+        if (!place.city && g.gCity) place.city = g.gCity;
+      }
+    } catch(e) {}
     return place;
   }));
   res.json({ success: true, places: enriched });
