@@ -2784,6 +2784,7 @@ function savePicked(){
   }
   applyAutoCollect(toSave);
   closePicker();save();renderList();renderCollections();if(mapInited)renderMapMarkers();
+  if(currentColId){var openCol=collections.find(function(c){return c.id===currentColId;});if(openCol&&!openCol.collabToken)renderColDetailPlaces(openCol);}
   showToast('add','ts',toSave.length+' place'+(toSave.length>1?'s':'')+' saved!',toSave.map(function(p){return p.name;}).join(', '));
   if(toSave.length===1)setTimeout(function(){openSheet(toSave[0].id);},400);
 }
@@ -2802,15 +2803,16 @@ function matchesAutoRule(p,rule){
 function applyAutoCollect(placeList){
   if(!placeList||placeList.length===0)return 0;
   var total=0;
-  collections.forEach(function(col){
-    if(!col.autoRule)return;
-    var matched=placeList.filter(function(p){return matchesAutoRule(p,col.autoRule)&&!col.placeIds.includes(p.id);});
-    if(matched.length>0){
-      col.placeIds=Array.from(new Set(col.placeIds.concat(matched.map(function(p){return p.id;}))));
-      total+=matched.length;
-      setTimeout(function(){showToast("ac-"+col.id,"ts","Auto-collected to "+col.name,matched.map(function(p){return p.name;}).join(", "));},600);
-    }
+  var toasts=[];
+  collections=collections.map(function(col){
+    if(!col.autoRule)return col;
+    var matched=placeList.filter(function(p){return matchesAutoRule(p,col.autoRule)&&!(col.placeIds||[]).includes(p.id);});
+    if(matched.length===0)return col;
+    total+=matched.length;
+    toasts.push({col:col,matched:matched});
+    return Object.assign({},col,{placeIds:Array.from(new Set((col.placeIds||[]).concat(matched.map(function(p){return p.id;}))))});
   });
+  toasts.forEach(function(t){setTimeout(function(){showToast("ac-"+t.col.id,"ts","Auto-collected to "+t.col.name,t.matched.map(function(p){return p.name;}).join(", "));},600);});
   return total;
 }
 
