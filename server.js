@@ -393,7 +393,7 @@ Text: ` + text;
 
 async function searchGooglePlace(query) {
   try {
-    var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,address_components,photos,opening_hours,price_level&key=" + GOOGLE_KEY;
+    var url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + encodeURIComponent(query) + "&inputtype=textquery&fields=place_id,name,rating,user_ratings_total,formatted_address,photos,opening_hours,price_level&key=" + GOOGLE_KEY;
     var res = await axios.get(url, { timeout: 8000 });
     if (res.data.error_message) console.error("Google error:", res.data.error_message);
     var candidates = res.data.candidates;
@@ -409,13 +409,17 @@ async function getGoogleData(name, city, country) {
   var photoUrl = null;
   if (place.photos && place.photos.length > 0) photoUrl = BACKEND_URL + "/photo?ref=" + encodeURIComponent(place.photos[0].photo_reference);
   var gCountry = null, gCity = null;
-  var comps = place.address_components || [];
-  var countryComp = comps.find(function(c){ return c.types.includes("country"); });
-  var cityComp = comps.find(function(c){ return c.types.includes("locality"); }) ||
-                 comps.find(function(c){ return c.types.includes("administrative_area_level_2"); }) ||
-                 comps.find(function(c){ return c.types.includes("administrative_area_level_1"); });
-  if (countryComp) gCountry = countryComp.long_name;
-  if (cityComp) gCity = cityComp.long_name;
+  if (place.formatted_address) {
+    var parts = place.formatted_address.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+    if (parts.length >= 1) {
+      var last = parts[parts.length - 1];
+      if (!/\d/.test(last)) gCountry = last;
+    }
+    if (parts.length >= 2) {
+      var secondLast = parts[parts.length - 2];
+      if (!/\d/.test(secondLast) && secondLast.length <= 60) gCity = secondLast;
+    }
+  }
   return { rating: place.rating || null, totalRatings: place.user_ratings_total || null, address: place.formatted_address || null, photoUrl, openNow: place.opening_hours ? place.opening_hours.open_now : null, priceLevel: place.price_level || null, gCountry, gCity };
 }
 

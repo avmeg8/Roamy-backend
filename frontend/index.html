@@ -429,12 +429,11 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
 .auto-rule-section{margin-top:16px;}
 .auto-rule-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .auto-rule-toggle-label{font-size:14px;font-weight:600;color:var(--gray-800);}
-.toggle-sw{position:relative;width:42px;height:24px;flex-shrink:0;}
-.toggle-sw input{opacity:0;width:0;height:0;}
-.toggle-track{position:absolute;inset:0;background:var(--gray-300);border-radius:12px;cursor:pointer;transition:background 0.2s;}
-.toggle-sw input:checked+.toggle-track{background:var(--blue);}
+.toggle-sw{position:relative;width:42px;height:24px;flex-shrink:0;cursor:pointer;}
+.toggle-track{position:absolute;inset:0;background:var(--gray-300);border-radius:12px;transition:background 0.2s;}
+.toggle-sw.on .toggle-track{background:var(--blue);}
 .toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:transform 0.2s;}
-.toggle-sw input:checked+.toggle-track::after{transform:translateX(18px);}
+.toggle-sw.on .toggle-track::after{transform:translateX(18px);}
 .auto-rule-fields{display:flex;flex-direction:column;gap:8px;}
 .auto-rule-input{width:100%;padding:10px 12px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-900);outline:none;box-sizing:border-box;}
 .auto-rule-input:focus{border-color:var(--blue);background:var(--white);}
@@ -1661,7 +1660,7 @@ function openEditColModal(id){
   showColModal(col.name,"Edit Collection","Save");
 }
 
-var _autoRuleTypes=[];
+var _autoRuleTypes=[];var _autoRuleEnabled=false;
 function showColModal(nameVal,title,btnLabel){
   var ex=document.getElementById("colModal");if(ex)ex.remove();
   var col=editingColId?collections.find(function(c){return c.id===editingColId;}):null;
@@ -1670,13 +1669,13 @@ function showColModal(nameVal,title,btnLabel){
   var colorGrid=COL_COLORS.map(function(c){return'<button class="color-opt'+(c===selectedColor?" selected":"")+'" style="background:'+c+'" onclick="selectColColor(\''+c+'\')"></button>';}).join('');
   var delBtn=editingColId?'<button class="mbtn secondary" style="color:var(--red)" onclick="deleteCol()">Delete</button>':'';
   var existingRule=col?.autoRule||null;
-  var ruleEnabled=!!existingRule;
+  _autoRuleEnabled=!!existingRule;
   _autoRuleTypes=existingRule?.types?existingRule.types.slice():[];
   var typeChipsHtml=ALL_CATS.map(function(cat){return'<button class="auto-rule-type-chip'+(_autoRuleTypes.includes(cat.k)?" active":"")+'" id="art-'+cat.k+'" onclick="toggleAutoType(\''+cat.k+'\')">'+cat.l+'</button>';}).join('');
   var autoRuleHtml='<div class="auto-rule-section">'+
     '<div class="auto-rule-toggle-row"><span class="auto-rule-toggle-label">Auto-collect</span>'+
-    '<label class="toggle-sw"><input type="checkbox" id="colAutoEnabled"'+(ruleEnabled?' checked':'')+' onchange="toggleAutoRuleFields()"><span class="toggle-track"></span></label></div>'+
-    '<div class="auto-rule-fields" id="autoRuleFields" style="display:'+(ruleEnabled?'flex':'none')+'">'+
+    '<div class="toggle-sw'+(!!existingRule?' on':'')+'" id="colAutoToggle" onclick="toggleAutoCollect()"><div class="toggle-track"></div></div></div>'+
+    '<div class="auto-rule-fields" id="autoRuleFields" style="display:'+(_autoRuleEnabled?'flex':'none')+'">'+
     '<input class="auto-rule-input" id="colAutoCountry" placeholder="Country (e.g. Japan, Israel)" value="'+esc(existingRule?.country||'')+'"/>'+
     '<input class="auto-rule-input" id="colAutoCity" placeholder="City (optional, e.g. Tel Aviv)" value="'+esc(existingRule?.city||'')+'"/>'+
     '<div class="modal-label" style="margin-top:6px;margin-bottom:6px">Place types (leave empty for all)</div>'+
@@ -1697,10 +1696,12 @@ function showColModal(nameVal,title,btnLabel){
   document.body.insertAdjacentHTML("beforeend",html);
   enableSwipeDismiss("colModal",function(){document.getElementById("colModal")?.remove();});
 }
-function toggleAutoRuleFields(){
-  var on=document.getElementById("colAutoEnabled")?.checked;
+function toggleAutoCollect(){
+  _autoRuleEnabled=!_autoRuleEnabled;
+  var tog=document.getElementById("colAutoToggle");
+  if(tog)tog.classList.toggle("on",_autoRuleEnabled);
   var fields=document.getElementById("autoRuleFields");
-  if(fields)fields.style.display=on?"flex":"none";
+  if(fields)fields.style.display=_autoRuleEnabled?"flex":"none";
 }
 function toggleAutoType(type){
   var idx=_autoRuleTypes.indexOf(type);
@@ -1740,7 +1741,7 @@ async function saveCol(){
       sectionMap[sid]=[];
     }
   }
-  var autoEnabled=document.getElementById("colAutoEnabled")?.checked;
+  var autoEnabled=_autoRuleEnabled;
   var autoCountry=(document.getElementById("colAutoCountry")?.value||"").trim();
   var autoCity=(document.getElementById("colAutoCity")?.value||"").trim();
   var autoRule=null;
