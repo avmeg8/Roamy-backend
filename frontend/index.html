@@ -604,6 +604,7 @@ body{display:flex;flex-direction:column;overflow:hidden;position:fixed;width:100
       <button class="col-date-pill" id="colDatePill" onclick="openDateModal()"></button>
       <div class="col-detail-meta" style="margin-top:10px">
         <div class="col-detail-stat" id="colDetailMeta"></div>
+        <div id="colDetailAutoRule" style="display:none;font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;width:100%;padding:0 2px"></div>
         <button class="col-detail-share" onclick="regenCover(currentColId)" style="margin-left:0">🎨</button>
         <button class="col-detail-share" onclick="openCollectionMap()">🗺️</button>
         <button class="col-detail-share" id="colDetailAddBtn" onclick="openAddPlacesToColModal(currentColId)">＋ Add places</button>
@@ -1266,6 +1267,8 @@ function openColDetail(colId){
   document.getElementById("colDetailEmoji").textContent=col.emoji||"🗺️";
   document.getElementById("colDetailName").textContent=col.name||"Collection";
   document.getElementById("colDetailMeta").textContent=ps.length+" place"+(ps.length!==1?"s":"")+(countries.length?" · "+countries.map(function(c){return flag(c);}).join(""):"");
+  var arEl=document.getElementById("colDetailAutoRule");
+  if(arEl){if(col.autoRule){var arParts=[];if(col.autoRule.country)arParts.push("📍 "+col.autoRule.country);if(col.autoRule.city)arParts.push(col.autoRule.city);if(col.autoRule.types&&col.autoRule.types.length>0)arParts.push(col.autoRule.types.join(', '));arEl.textContent="🤖 Auto-collect: "+arParts.join(' · ');arEl.style.display="";}else{arEl.style.display="none";}}
   var collabBtn=document.getElementById("colDetailCollabBtn");
   if(collabBtn){collabBtn.style.display=(col.isCollab&&col.collabToken)?"flex":"none";}
   var pill=document.getElementById("colDatePill");
@@ -1767,14 +1770,15 @@ async function saveCol(){
     collections.push(updatedCol);
   }
   if(autoRule&&JSON.stringify(autoRule)!==JSON.stringify(oldRule)){
-    var retroCol=collections.find(function(c){return c.id===colId;});
-    if(retroCol){
-      var retroAdded=places.filter(function(p){return matchesAutoRule(p,autoRule)&&!retroCol.placeIds.includes(p.id);});
-      if(retroAdded.length>0){
-        retroCol.placeIds=Array.from(new Set(retroCol.placeIds.concat(retroAdded.map(function(p){return p.id;}))));
-        setTimeout(function(){showToast("retro","ts","Auto-added "+retroAdded.length+" existing place"+(retroAdded.length!==1?"s":"")+" to "+name);},400);
-      }
-    }
+    var _retroCount=0;
+    collections=collections.map(function(c){
+      if(c.id!==colId)return c;
+      var retroAdded=places.filter(function(p){return matchesAutoRule(p,autoRule)&&!(c.placeIds||[]).includes(p.id);});
+      if(retroAdded.length===0)return c;
+      _retroCount=retroAdded.length;
+      return Object.assign({},c,{placeIds:Array.from(new Set((c.placeIds||[]).concat(retroAdded.map(function(p){return p.id;}))))});
+    });
+    if(_retroCount>0)setTimeout(function(){showToast("retro","ts","Auto-added "+_retroCount+" existing place"+(_retroCount!==1?"s":"")+" to "+name);},400);
   }
   save();
   document.getElementById("colModal").remove();
@@ -2804,9 +2808,18 @@ function applyAutoCollect(placeList){
   if(!placeList||placeList.length===0)return 0;
   var total=0;
   var toasts=[];
+  var colsWithRule=collections.filter(function(c){return!!c.autoRule;});
+  console.log('[AutoCollect] '+placeList.length+' place(s), '+colsWithRule.length+' collection(s) with auto-rule');
+  placeList.forEach(function(p){console.log('[AutoCollect] Saving: "'+p.name+'" country='+JSON.stringify(p.country)+' type='+JSON.stringify(p.type));});
   collections=collections.map(function(col){
     if(!col.autoRule)return col;
-    var matched=placeList.filter(function(p){return matchesAutoRule(p,col.autoRule)&&!(col.placeIds||[]).includes(p.id);});
+    console.log('[AutoCollect] Rule for "'+col.name+'":',JSON.stringify(col.autoRule));
+    var matched=placeList.filter(function(p){
+      var r=matchesAutoRule(p,col.autoRule);
+      var notIn=!(col.placeIds||[]).includes(p.id);
+      console.log('[AutoCollect]  → "'+p.name+'": matches='+r+' notInCol='+notIn);
+      return r&&notIn;
+    });
     if(matched.length===0)return col;
     total+=matched.length;
     toasts.push({col:col,matched:matched});
